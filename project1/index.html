@@ -2,87 +2,27 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
-	<title>Phyllotaxis Starting</title>
-	<style>canvas{ border: 1px solid black; }</style>
-	<script>
-	"use strict";
-	const canvasWidth = 400, canvasHeight = 300;
-	const waveHeight = 120;
-	const fps = 12;
-	let ctx;
-	let x = 0, y = 0;
-	let angle = 0;  // really counter
-	let n = 0;
-	let c = 10;
-	
-	
-	//const divergence = 137.5;
-	//const divergence = -137.3;
-	const divergence = -137.6;
-	
-	window.onload = init;
-
-	function init(){
-		ctx = canvas.getContext("2d");
-		canvas.width = canvasWidth;
-		canvas.height = canvasHeight;
-		ctx.fillRect(0,0,canvasWidth,canvasHeight);
-		loop();
-	}
-	
-	function loop()
-	{
-		setTimeout(loop,1000/120);
-		// each frame draw a new dot
-		// `a` is the angle
-		// `r` is the radius from the center (e.g. "Pole") of the flower
-		// `c` is the "padding/spacing" between the dots
-		let a = n * dtr(divergence);
-		let r = c * Math.sqrt(n);
-		//console.log(a,r);
-		
-		// now calculate the `x` and `y`
-		let x = r * Math.cos(a) + canvasWidth/2;
-		let y = r * Math.sin(a) + canvasHeight/2;
-		//console.log(x,y);
-		
-		//drawCircle(ctx,x,y,2,"white");
-		
-		//let color = `rgb(${n % 256},0,255)`;
-		
-		//let aDegrees = (n * divergence) % 256;
-		//let color = `rgb(${aDegrees},0,255)`;
-		
-		//let aDegrees = (n * divergence) % 361;
-		//let color = `hsl(${aDegrees},100%,50%)`;
-		
-		let color = `hsl(${n/2 % 361},100%,50%)`;
-		
-		c-=.005;
-		
-		drawCircle(ctx,x,y,2,color);
-		n++;
-	}
-
-	// helpers
-	function dtr(degrees){
-		return degrees * (Math.PI/180);
-	}
-
-	function drawCircle(ctx,x,y,radius,color){
-		ctx.save();
-		ctx.fillStyle = color;
-		ctx.beginPath();
-		ctx.arc(x,y,radius,0,Math.PI * 2);
-		ctx.closePath();
-		ctx.fill();
-		ctx.restore();
-	}
-
-	</script>
+	<title>Project 1</title>
+	<link rel="stylesheet" href="styles/default-styles.css">
+	<script src = "src/index.js"></script>
+	<script src = "src/celLIB.js"></script>
+	<script>window.onload = index.init;</script>
 </head>
 <body>
 <canvas id="canvas"></canvas>
-
+<section id="timeControls">
+	<span><input id="btnStart" type="button" value="Start"/></span>
+	<span><input id="btnPause" type="button" value="Pause"/></span>
+    <span><input id="btnClear" type="button" value="Clear"/></span>
+	<span><input id="btnExport" type="button" value="Export"/></span>
+</section>
+<section id="colorControls">
+	<span><input type="radio" id="red" name="color"><label for="red">Red</label></span>
+	<span><input type="radio" id="orange" name="color"><label for="orange">Orange</label></span>
+	<span><input type="radio" id="yellow" name="color"><label for="yellow">Yellow</label></span>
+	<span><input type="radio" id="green" name="color"><label for="green">Green</label></span>
+	<span><input type="radio" id="blue" name="color"><label for="blue">Blue</label></span>
+	<span><input type="radio" id="purple" name="color"><label for="purple">Purple</label></span>
+</section>
 </body>
 </html>
