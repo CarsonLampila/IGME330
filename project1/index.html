@@ -2,27 +2,89 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
-	<title>Project 1</title>
+	<title>Firework Generator</title>
 	<link rel="stylesheet" href="styles/default-styles.css">
 	<script src = "src/index.js"></script>
 	<script src = "src/celLIB.js"></script>
 	<script>window.onload = index.init;</script>
+	<link href="https://fonts.googleapis.com/css2?family=Kite+One&display=swap" rel="stylesheet">
 </head>
 <body>
+<header><h1>Firework Generator</h1></header>
+
+<main>
+	<p>Create your own firework scene using </br> Algorithmic Botony!</p>
+	<p>Click anywhere on the canvas to create your own firework.
+	You can choose your desired starting and ending colors, size of petals, padding between petals, and degree of rotation.
+	Along the way you can pause, start, reverse, or clear the canvas
+	Once you have completed your canvas press the export button and you can save your picture!</p>
+</main>
+
 <canvas id="canvas"></canvas>
-<section id="timeControls">
-	<span><input id="btnStart" type="button" value="Start"/></span>
-	<span><input id="btnPause" type="button" value="Pause"/></span>
-    <span><input id="btnClear" type="button" value="Clear"/></span>
-	<span><input id="btnExport" type="button" value="Export"/></span>
+
+<section id="tools">
+	<section id="timeControls">
+		<span><input id="btnStart" type="button" value="Start"/></span>
+		<span><input id="btnPause" type="button" value="Pause"/></span>
+		<span><input id="btnReverse" type="button" value="Reverse"/></span>
+		<span><input id="btnClear" type="button" value="Clear"/></span>
+		<span><input id="btnExport" type="button" value="Export"/></span>
+	</section>
+
+	<section id="colorStartControls">
+		<label class="bold">Start Color:&ensp;&nbsp;</label>
+		<input type="radio" id="sRed" name="color"><label for="red">Red</label>
+		<input type="radio" id="sOrange" name="color"><label for="orange">Orange</label>
+		<input type="radio" id="sYellow" name="color"><label for="yellow">Yellow</label>
+		<input type="radio" id="sGreen" name="color"><label for="green">Green</label>
+		<input type="radio" id="sBlue" name="color"><label for="blue">Blue</label>
+		<input type="radio" id="sPurple" name="color"><label for="purple">Purple</label>
+	</section>
+	
+	<section id="colorEndControls">
+		<label class="bold">End Color:&ensp;&nbsp;</label>
+		<input type="radio" id="eRed" name="color"><label for="red">Red</label>
+		<input type="radio" id="eOrange" name="color"><label for="orange">Orange</label>
+		<input type="radio" id="eYellow" name="color"><label for="yellow">Yellow</label>
+		<input type="radio" id="eGreen" name="color"><label for="green">Green</label>
+		<input type="radio" id="eBlue" name="color"><label for="blue">Blue</label>
+		<input type="radio" id="ePurple" name="color"><label for="purple">Purple</label>
+		<input type="radio" id="eCycle" name="color"><label for="cycle">Cycle</label>
+	</section>
+	
+	<section id="degreeControls">
+		<label class="bold">Degree:</label>
+		<input type="radio" id="degree1" name="degree"><label for="degree1">100.0˚</label>
+		<input type="radio" id="degree2" name="degree"><label for="degree2">129.1˚</label>
+		<input type="radio" id="degree3" name="degree"><label for="degree3">137.1˚</label>
+		<input type="radio" id="degree4" name="degree"><label for="degree4">137.5˚</label>
+		<input type="radio" id="degree5" name="degree"><label for="degree5">137.9˚</label>
+		<input type="radio" id="degree6" name="degree"><label for="degree6">138.1˚</label>
+		<input type="radio" id="degree7" name="degree"><label for="degree7">200.0˚</label>
+	</section>
+
+	<section id="fpsControls">
+		<label class="bold">FPS:&emsp;&nbsp;</label>
+		<input type="radio" id="fps1" name="fps"><label for="fps1">15</label>
+		<input type="radio" id="fps2" name="fps"><label for="fps2">30</label>
+		<input type="radio" id="fps3" name="fps"><label for="fps3">45</label>
+		<input type="radio" id="fps4" name="fps"><label for="fps4">60</label>
+		<input type="radio" id="fps5" name="fps"><label for="fps5">75</label>
+		<input type="radio" id="fps6" name="fps"><label for="fps6">90</label>
+		<input type="radio" id="fps7" name="fps"><label for="fps7">105</label>
+		<input type="radio" id="fps8" name="fps"><label for="fps8">120</label>
+	</section>
+
+	<section id="petalControls">
+		<label class="bold">Size:&emsp;&ensp;</label>
+		<input type="range" class="slider" id="petalSize" min="1" max="50" value="25">
+	</section>
+
+	<section id="paddingControls">
+		<label class="bold">Padding:</label>
+		<input type="range" class="slider" id="padding" min="1" max="20" value="10">
+	</section>
 </section>
-<section id="colorControls">
-	<span><input type="radio" id="red" name="color"><label for="red">Red</label></span>
-	<span><input type="radio" id="orange" name="color"><label for="orange">Orange</label></span>
-	<span><input type="radio" id="yellow" name="color"><label for="yellow">Yellow</label></span>
-	<span><input type="radio" id="green" name="color"><label for="green">Green</label></span>
-	<span><input type="radio" id="blue" name="color"><label for="blue">Blue</label></span>
-	<span><input type="radio" id="purple" name="color"><label for="purple">Purple</label></span>
-</section>
+
 </body>
 </html>

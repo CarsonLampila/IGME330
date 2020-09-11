@@ -4,27 +4,32 @@ console.log("celLIB.js loaded");
 (function(){
 	let celLIB = 
 	{
+		// Return Random Color
 		getRandomColor()
 		{
 			const getByte = _ => 55 + Math.round(Math.random() * 200);		
 			return `rgba(${getByte()},${getByte()},${getByte()},.8)`;
 		},
 	
+		// Reurn Random Int
 		getRandomInt(min, max) 
 		{
 			return Math.floor(Math.random() * (max - min + 1)) + min;
 		},
 		
+		// Convert to Degrees
 		dtr(degrees){
 			return degrees * (Math.PI/180);
 		},
 		
-		cls(ctx){
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			ctx.fillRect(0,0,canvas.width,canvas.height);
+		// Clear Screen
+		cls(ctx, canvasStartX, canvasStartY){
+			ctx.clearRect(canvasStartX, canvasStartY, canvas.width + canvasStartX, canvas.height + canvasStartY);
+			ctx.fillRect(canvasStartX, canvasStartY, canvas.width + canvasStartX, canvas.height + canvasStartY);
 			clearTimeout();
 		},
 		
+		// Draw Circles
 		drawCircle(ctx, cX, cY, cSize, fillStyle="black", lineWidth=0)
 		{
 			ctx.save();
@@ -37,6 +42,16 @@ console.log("celLIB.js loaded");
 			ctx.restore();
 		},
 		
+		colorTransition(cStart, cEnd)
+		{
+			let colorChange = cStart;
+			let color = `hsl(${colorChange/2 % 361},100%,50%)`;	
+			if (cEnd == -1)
+			colorChange++;			
+			return colorChange;
+		}
+		
+		// Export Canvas
 		doExport()
 		{
 			const data = canvas.toDataURL(); 
