@@ -5,18 +5,15 @@ console.log("index.js loaded");
 	const canvasWidth = 1000, canvasHeight = 700;
 	const canvasStartX = 0, canvasStartY = 0;
 	let ctx;
-	let fps = 12;
 	let mouseX = -1, mouseY = -1;
 	let x = 0, y = 0;
 	let n = 0;
-	let divergence = 137.5;
+	let colorStart = 0, colorEnd = -1, colorChange = 0;
 	let radius = 2;
-	let colorStart = 0, colorEnd = -1;
-	let colorChange = 0;
-	let spaceStart = 10;
-	let spaceChange = 10;
-	let reverse = false;
-	let stop = true;
+	let spaceStart = 10, spaceChange = 10;
+	let divergence = 137.5;
+	let fps = 60;
+	let stop = true, reverse = false;
 
 	
 	let index = 
@@ -28,7 +25,6 @@ console.log("index.js loaded");
 			canvas.height = canvasHeight;
 			ctx.fillRect(canvasStartX,canvasStartY,canvasWidth + canvasStartX,canvasHeight + canvasStartY);
 			index.setupUI();
-			index.loop();
 		},
 		
 		// Setup UI
@@ -37,7 +33,7 @@ console.log("index.js loaded");
 			// Draw
 			canvas.onclick = index.canvasClicked;
 			
-			// Time Controls
+			// Button Controls
 			document.querySelector("#btnStart").onclick = function(e){
 				stop = false;
 				index.loop();
@@ -58,24 +54,33 @@ console.log("index.js loaded");
 			
 			// Color Controls
 			document.querySelector("#sRed").checked = true;
-			document.querySelector("#sRed").onclick = function(e){ index.colorSet(0); };
-			document.querySelector("#sOrange").onclick = function(e){ index.colorSet(50); };
-			document.querySelector("#sYellow").onclick =  function(e){index.colorSet(100); };
-			document.querySelector("#sGreen").onclick = function(e){ index.colorSet(200); };
-			document.querySelector("#sBlue").onclick = function(e){ index.colorSet(350); }; 
-			document.querySelector("#sPurple").onclick = function(e){ index.colorSet(500); };
+			document.querySelector("#sRed").onclick = function(e){ index.colorSet(0, colorEnd); };
+			document.querySelector("#sOrange").onclick = function(e){ index.colorSet(50, colorEnd); };
+			document.querySelector("#sYellow").onclick =  function(e){index.colorSet(100, colorEnd); };
+			document.querySelector("#sGreen").onclick = function(e){ index.colorSet(200, colorEnd); };
+			document.querySelector("#sBlue").onclick = function(e){ index.colorSet(350, colorEnd); }; 
+			document.querySelector("#sPurple").onclick = function(e){ index.colorSet(500, colorEnd); };
 			
 			document.querySelector("#eCycle").checked = true;
-			document.querySelector("#eRed").onclick = function(e){ index.colorSet(0); };
-			document.querySelector("#eOrange").onclick = function(e){ index.colorSet(50); };
-			document.querySelector("#eYellow").onclick =  function(e){index.colorSet(100); };
-			document.querySelector("#eGreen").onclick = function(e){ index.colorSet(200); };
-			document.querySelector("#eBlue").onclick = function(e){ index.colorSet(350); };
-			document.querySelector("#ePurple").onclick = function(e){ index.colorSet(500); };
-			document.querySelector("#eCycle").onclick = function(e){ index.colorSet(-1); };
+			document.querySelector("#eRed").onclick = function(e){ index.colorSet(colorStart, 0); };
+			document.querySelector("#eOrange").onclick = function(e){ index.colorSet(colorStart, 50); };
+			document.querySelector("#eYellow").onclick =  function(e){index.colorSet(colorStart, 100); };
+			document.querySelector("#eGreen").onclick = function(e){ index.colorSet(colorStart, 200); };
+			document.querySelector("#eBlue").onclick = function(e){ index.colorSet(colorStart, 350); };
+			document.querySelector("#ePurple").onclick = function(e){ index.colorSet(colorStart, 500); };
+			document.querySelector("#eCycle").onclick = function(e){ index.colorSet(colorStart, -1); };
+			
+			// Petal Controls
+			document.querySelector("#petalSize").oninput = function(e){ radius = document.querySelector("#petalSize").value / 10; };
+			
+			// Space Controls
+			document.querySelector("#padding").oninput = function(e){ 
+				spaceStart = document.querySelector("#padding").value; 
+				spaceChange = document.querySelector("#padding").value; 
+			};
 			
 			// FPS Controls
-			document.querySelector("#fps1").checked = true;
+			document.querySelector("#fps4").checked = true;
 			document.querySelector("#fps1").onclick = function(e){ fps = 15; };
 			document.querySelector("#fps2").onclick = function(e){ fps = 30; };
 			document.querySelector("#fps3").onclick = function(e){ fps = 45; };
@@ -94,12 +99,6 @@ console.log("index.js loaded");
 			document.querySelector("#degree5").onclick = function(e){ index.degreeTransition(-137.9); };
 			document.querySelector("#degree6").onclick = function(e){ index.degreeTransition(-138.1); };
 			document.querySelector("#degree7").onclick = function(e){ index.degreeTransition(200.0); };
-			
-			// Petal Controls
-			document.querySelector("#petalSize").oninput = function(e){ radius = document.querySelector("#petalSize").value / 10; };
-			
-			// Space Controls
-			document.querySelector("#padding").oninput = function(e){ space = document.querySelector("#padding").value; };
 		},
 
 		// Draw Fireworks
@@ -108,31 +107,29 @@ console.log("index.js loaded");
 			// Pause
 			if (stop) return;
 			
-			// Ensure a click has occured
-			if (mouseX != -1 && mouseY != -1)
-			{
-				// each frame draw a new dot
-				setTimeout(index.loop,100/fps);
+			// each frame draw a new dot
+			setTimeout(index.loop,1000/fps);
 
-				// `a` is the angle
-				// `n` is the distance from start
-				// `r` is the radius
-				// `space` is the "padding/spacing" between the dots
-				let a = n * celLIB.dtr(divergence);
-				let r = spaceChange * Math.sqrt(n);
+			// `a` is the angle
+			// `n` is the distance from start
+			// `r` is the radius
+			// `space` is the "padding/spacing" between the dots
+			let a = n * celLIB.dtr(divergence);
+			let r = spaceChange * Math.sqrt(n);
 		
-				// Calculate
-				let x = r * Math.cos(a) + mouseX;
-				let y = r * Math.sin(a) + mouseY;
-				let color = celLIB.colorTransition(colorStart, colorEnd);
+			// Calculate
+			let x = r * Math.cos(a) + mouseX;
+			let y = r * Math.sin(a) + mouseY;
+			
+			colorChange = celLIB.colorTransition(colorChange, colorStart, colorEnd);	
+			let color = `hsl(${colorChange/2 % 361},100%,50%)`;	
 		
-				// Draw
-				celLIB.drawCircle(ctx,x,y,radius,color);
+			// Draw
+			celLIB.drawCircle(ctx,x,y,radius,color);
 				
-				// Alternate
-				n++;
-				spaceChange-=.005;
-			}
+			// Alternate	
+			n++;
+			spaceChange-=.005;
 		}, 
 		
 		// Start firework where click

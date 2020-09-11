@@ -10,83 +10,60 @@
 body {
 	background: #add8e6;
 	font-family: 'Kite One', sans-serif;
+	text-align: center;
 }
 
 header {
 	margin-left: 1010px;
 	margin-top: 10px;
 	padding: 10px;
-	text-align: center;
 	background: #1abc9c;
-	color: white;
-	font-size: 30px;
 	box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);	
+	font-size: 30px;
+	color: white;
 }
 
 main {
 	margin-left: 1010px;
 	margin-top: 10px;
 	padding: 10px;
-	color: white;
-	font-size: 30px;
 	background: #35b5ac;
-	text-align: center;
 	box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);	
+	font-size: 30px;
+	color: white;
 }
 
-#timeControls{
-	position: absolute;
-	z-index: 100;
-	left: 350px;
-	top: 725px;
-}
-
-#colorStartControls{
-	position: absolute;
-	z-index: 100;
-	left: 25px;
-	top: 755px;
-}
-
-#colorEndControls{
-	position: absolute;
-	z-index: 100;
-	left: 25px;
-	top: 785px;
-}
-
-#fpsControls{
-	position: absolute;
-	z-index: 100;
-	left: 25px;
-	top: 815px;
-}
-
-#degreeControls{
-	position: absolute;
-	z-index: 100;
-	left: 25px;
-	top: 845px;
-}
-
-#petalControls{
-	position: absolute;
-	z-index: 100;
-	left: 600px;
-	top: 768px;
-}
-
-#paddingControls{
-	position: absolute;
-	z-index: 100;
-	left: 600px;
-	top: 802px;
-}
-
-.slider {
-  width: 350px;
+footer {
+	margin-left: 3px;
+	bottom: 15px;
+	width: 1000px;
+	background: #57a0d3;
+	box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);	
+	font-size: 18px;
+	color: white;
+    position: fixed;
 }
 
 label.bold {
 	font-weight: bold;
+}
+
+.button {
+	background-color: #008CBA;
+	color: white;
+	padding: 5px 25px;
+	display: inline-block;
+	border-radius: 12px;
+	font-size: 18px;
+	margin: 4px 45px;
+	cursor: pointer;
+}
+
+.radial{
+	cursor: pointer;
+}
+
+.slider {
+	width: 500px;
+	cursor: pointer;
 }

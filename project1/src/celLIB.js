@@ -42,14 +42,42 @@ console.log("celLIB.js loaded");
 			ctx.restore();
 		},
 		
-		colorTransition(cStart, cEnd)
+		// Draw Rectangle
+		drawRectangle(ctx, cX, cY, width, height, fillStyle="black", lineWidth=0, strokeStyle="black")
 		{
-			let colorChange = cStart;
-			let color = `hsl(${colorChange/2 % 361},100%,50%)`;	
-			if (cEnd == -1)
-			colorChange++;			
-			return colorChange;
-		}
+			ctx.fillStyle = fillStyle; 
+			ctx.save();
+			ctx.beginPath();
+			ctx.rect(cX,cY,width,height);
+			ctx.closePath();
+			ctx.fill();
+			
+			if(lineWidth > 0)
+			{
+				ctx.lineWidth = lineWidth;
+				ctx.strokeStyle = strokeStyle;
+				ctx.stroke();
+			}
+			ctx.restore();
+		},
+		
+		// Trasnition Colors
+		colorTransition(cCurrent, cStart, cEnd)
+		{
+			let colorChange = cCurrent;
+			// Check for loop
+			if (cEnd != -1)
+				// Buffer to have whole color
+				if (colorChange == cEnd + 45)
+					colorChange = cStart;
+				// Purple to Red
+				else if (colorChange > cEnd)
+					if (colorChange > 600)
+						colorChange = 0;
+					
+			colorChange++;	
+			return colorChange;	
+		},
 		
 		// Export Canvas
 		doExport()
