@@ -2,90 +2,111 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
-	<title>Firework Generator</title>
+	<title>Custom Firework Generator</title>
 	<link href="https://fonts.googleapis.com/css2?family=Kite+One&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="styles/default-styles.css">
 	<script src = "src/index.js"></script>
 	<script src = "src/celLIB.js"></script>
-	<script>window.onload = index.init;</script>
 </head>
 <body>
 
-<header><h1>Firework Generator</h1></header>
+<header>
+	<h1>Firework Generator</h1>
+</header>
 
 <main>
-	<p>Create your own firework scene using </br> Algorithmic Botony!</p>
-	<p>Click anywhere on the canvas to create your own firework.
-	You can choose your desired starting and ending colors, size of petals, padding between petals, and degree of rotation.
-	Along the way you can pause, start, reverse, or clear the canvas
-	Once you have completed your canvas press the export button and you can save your picture!</p>
+	<p>Create your own firework scene using <br> Algorithmic Botony!</p>
+	<p>Click anywhere on the canvas to create <br> your own firework!</p>
+	<p>You can choose your desired: shape, starting 
+	   color, ending colors, size of petals, padding 
+	   between petals, and degree of rotation below the 
+	   canvas. <br> 
+	   Along the way you can pause, resume,
+	   randomize selection, reverse, or clear the canvas 
+	   using the provided buttons. Once you have 
+	   completed your canvas press the export button 
+	   and you can save your picture!</p>
 </main>
 
 <canvas id="canvas"></canvas>
 
-
 <footer>
-	<span><input id="btnStart" type="button" class="button" value="Start"/></span>
 	<span><input id="btnPause" type="button" class="button" value="Pause"/></span>
+	<span><input id="btnResume" type="button" class="button" value="Resume"/></span>
+	<span><input id="btnRandom" type="button" class="button" value="Randomize"/></span>
 	<span><input id="btnReverse" type="button" class="button" value="Reverse"/></span>
 	<span><input id="btnClear" type="button" class="button" value="Clear"/></span>
 	<span><input id="btnExport" type="button" class="button" value="Export"/></span>
-		
-	</br>
-		
-	<label class="bold">Start Color:</label>
-	<input type="radio" id="sRed" class="radial" name="sColor"><label for="red">Red</label>
-	<input type="radio" id="sOrange" class="radial" name="sColor"><label for="orange">Orange</label>
-	<input type="radio" id="sYellow" class="radial" name="sColor"><label for="yellow">Yellow</label>
-	<input type="radio" id="sGreen" class="radial" name="sColor"><label for="green">Green</label>
-	<input type="radio" id="sBlue" class="radial" name="sColor"><label for="blue">Blue</label>
-	<input type="radio" id="sPurple" class="radial" name="sColor"><label for="purple">Purple</label>
-		
-	</br>
-		
-	<label class="bold">End Color:</label>
-	<input type="radio" id="eRed" class="radial" name="eColor"><label for="red">Red</label>
-	<input type="radio" id="eOrange" class="radial" name="eColor"><label for="orange">Orange</label>
-	<input type="radio" id="eYellow" class="radial" name="eColor"><label for="yellow">Yellow</label>
-	<input type="radio" id="eGreen" class="radial" name="eColor"><label for="green">Green</label>
-	<input type="radio" id="eBlue" class="radial" name="eColor"><label for="blue">Blue</label>
-	<input type="radio" id="ePurple" class="radial" name="eColor"><label for="purple">Purple</label>
-	<input type="radio" id="eCycle" class="radial" name="eColor"><label for="cycle">Cycle</label>
-			
-	</br>
-		
-	<label class="bold">Size:</label>
-	<input type="range" class="slider" id="petalSize" min="1" max="50" value="25">
-		
-	</br>
-		
-	<label class="bold">Padding:</label>
-	<input type="range" class="slider" id="padding" min="1" max="20" value="10">
 	
-	</br>
+	<br>
+	
+	<label class="bold">Shape:&ensp;</label>
+	<label for="shape1">Circle</label><input type="radio" id="shape1" class="radial" name="shape">
+	<label for="shape2">Square</label><input type="radio" id="shape2" class="radial" name="shape">
+	<label for="shape3">Triangle</label><input type="radio" id="shape3" class="radial" name="shape">
+	<label for="shape4">Diamond</label><input type="radio" id="shape4" class="radial" name="shape">
+	<label for="shape5">X</label><input type="radio" id="shape5" class="radial" name="shape">
 		
-	<label class="bold">Degree:</label>
-	<input type="radio" id="degree1" class="radial" name="degree"><label for="degree1">100.0˚</label>
-	<input type="radio" id="degree2" class="radial" name="degree"><label for="degree2">129.1˚</label>
-	<input type="radio" id="degree3" class="radial" name="degree"><label for="degree3">137.1˚</label>
-	<input type="radio" id="degree4" class="radial" name="degree"><label for="degree4">137.5˚</label>
-	<input type="radio" id="degree5" class="radial" name="degree"><label for="degree5">137.9˚</label>
-	<input type="radio" id="degree6" class="radial" name="degree"><label for="degree6">138.1˚</label>
-	<input type="radio" id="degree7" class="radial" name="degree"><label for="degree7">200.0˚</label>
+	<br>
 		
-	</br>
+	<label class="bold">Start Color:&ensp;</label>
+	<label for="sRed">Red</label><input type="radio" id="sRed" class="radial" name="sColor">
+	<label for="sOrange">Orange</label><input type="radio" id="sOrange" class="radial" name="sColor">
+	<label for="sYellow">Yellow</label><input type="radio" id="sYellow" class="radial" name="sColor">
+	<label for="sGreen">Green</label><input type="radio" id="sGreen" class="radial" name="sColor">
+	<label for="sBlue">Blue</label><input type="radio" id="sBlue" class="radial" name="sColor">
+	<label for="sPurple">Purple</label><input type="radio" id="sPurple" class="radial" name="sColor">
 		
-	<label class="bold">FPS:&emsp;&nbsp;</label>
-	<input type="radio" id="fps1" class="radial" name="fps"><label for="fps1">15</label>
-	<input type="radio" id="fps2" class="radial" name="fps"><label for="fps2">30</label>
-	<input type="radio" id="fps3" class="radial" name="fps"><label for="fps3">45</label>
-	<input type="radio" id="fps4" class="radial" name="fps"><label for="fps4">60</label>
-	<input type="radio" id="fps5" class="radial" name="fps"><label for="fps5">75</label>
-	<input type="radio" id="fps6" class="radial" name="fps"><label for="fps6">90</label>
-	<input type="radio" id="fps7" class="radial" name="fps"><label for="fps7">105</label>
-	<input type="radio" id="fps8" class="radial" name="fps"><label for="fps8">120</label>
+	<br>
+		
+	<label class="bold">End Color:&ensp;</label>
+	<label for="eRed">Red</label><input type="radio" id="eRed" class="radial" name="eColor">
+	<label for="eOrange">Orange</label><input type="radio" id="eOrange" class="radial" name="eColor">
+	<label for="eYellow">Yellow</label><input type="radio" id="eYellow" class="radial" name="eColor">
+	<label for="eGreen">Green</label><input type="radio" id="eGreen" class="radial" name="eColor">
+	<label for="eBlue">Blue</label><input type="radio" id="eBlue" class="radial" name="eColor">
+	<label for="ePurple">Purple</label><input type="radio" id="ePurple" class="radial" name="eColor">
+	<label for="eCycle">Cycle</label><input type="radio" id="eCycle" class="radial" name="eColor">
+			
+	<br>
+		
+	<label class="bold">Size:&ensp;</label>
+	<input type="range" class="slider" id="petalSize" min="1" max="50" value="25">
+	<label for="sInc">Increase</label><input type="radio" id="sInc" class="radial" name="cSize">
+	<label for="sDec">Decrease</label><input type="radio" id="sDec" class="radial" name="cSize">
+	<label for="sNone">None</label><input type="radio" id="sNone" class="radial" name="cSize">
+		
+	<br>
+		
+	<label class="bold">Padding:&ensp;</label>
+	<input type="range" class="slider" id="padding" min="1" max="200" value="100">
+	<label for="pInc">Increase</label><input type="radio" id="pInc" class="radial" name="cPad">
+	<label for="pDec">Decrease</label><input type="radio" id="pDec" class="radial" name="cPad">
+	<label for="pNone">None</label><input type="radio" id="pNone" class="radial" name="cPad">
+	
+	<br>
+		
+	<label class="bold">Degree:&ensp;</label>
+	<label for="degree1">100.0˚</label><input type="radio" id="degree1" class="radial" name="degree">
+	<label for="degree2">129.1˚</label><input type="radio" id="degree2" class="radial" name="degree">
+	<label for="degree3">137.1˚</label><input type="radio" id="degree3" class="radial" name="degree">
+	<label for="degree4">137.5˚</label><input type="radio" id="degree4" class="radial" name="degree">
+	<label for="degree5">137.9˚</label><input type="radio" id="degree5" class="radial" name="degree">
+	<label for="degree6">138.1˚</label><input type="radio" id="degree6" class="radial" name="degree">
+	<label for="degree7">200.0˚</label><input type="radio" id="degree7" class="radial" name="degree">
+		
+	<br>
+		
+	<label class="bold">FPS:&ensp;</label>
+	<label for="fps1">15</label><input type="radio" id="fps1" class="radial" name="fps">
+	<label for="fps2">30</label><input type="radio" id="fps2" class="radial" name="fps">
+	<label for="fps3">45</label><input type="radio" id="fps3" class="radial" name="fps">
+	<label for="fps4">60</label><input type="radio" id="fps4" class="radial" name="fps">
+	<label for="fps5">75</label><input type="radio" id="fps5" class="radial" name="fps">
+	<label for="fps6">90</label><input type="radio" id="fps6" class="radial" name="fps">
+	<label for="fps7">105</label><input type="radio" id="fps7" class="radial" name="fps">
+	<label for="fps8">120</label><input type="radio" id="fps8" class="radial" name="fps">
 </footer>
-
 
 </body>
 </html>
