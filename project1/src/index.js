@@ -12,8 +12,8 @@ console.log("index.js loaded");
 	let stop = true, reverse = false;
 	let shape = 0;
 	let colorStart = 0, colorEnd = -1, colorChange = 0;
-	let radius = 2.5, sizeChange = 0;
-	let space = 10, padChange = 0;
+	let radius = 2.5, radiusCur = 2.5, sizeChange = 0;
+	let space = 10, spaceCur = 10, padChange = 0;
 	let change = .005;
 	let divergence = 137.5;
 	let fps = 60;
@@ -37,6 +37,7 @@ console.log("index.js loaded");
 		canvas.onclick = canvasClicked;
 
 		// Button Controls
+		// How to create and utilize buttons: https://www.w3schools.com/tags/tag_button.asp
 		document.querySelector("#btnPause").onclick = function(e){
 			stop = true;
 		}; 	
@@ -57,6 +58,7 @@ console.log("index.js loaded");
 		document.querySelector("#btnExport").onclick = celLIB.doExport;
 		
 		// Shape Controls
+		// How to create and utilize radials: https://www.w3schools.com/tags/att_input_type_radio.asp
 		document.querySelector("#shape1").checked = true;
 		document.querySelector("#shape1").onclick = function(e){ shape = 0; };
 		document.querySelector("#shape2").onclick = function(e){ shape = 1; };
@@ -84,14 +86,19 @@ console.log("index.js loaded");
 		document.querySelector("#eCycle").onclick = function(e){ colorSet(colorStart, -1); };
 			
 		// Petal Controls
-		document.querySelector("#petalSize").oninput = function(e){ radius = document.querySelector("#petalSize").value / 10; };
+		// How to create and utilize sliders: https://www.w3schools.com/howto/howto_js_rangeslider.asp
+		document.querySelector("#petalSize").oninput = function(e){ radius = document.querySelector("#petalSize").value / 10; 
+			radiusCur = radius;
+		};
 		document.querySelector("#sNone").checked = true;
 		document.querySelector("#sNone").onclick = function(e){ sizeChange = 0; };
 		document.querySelector("#sInc").onclick = function(e){ sizeChange = 1; };
 		document.querySelector("#sDec").onclick = function(e){ sizeChange = 2; };
 			
 		// Space Controls
-		document.querySelector("#padding").oninput = function(e){ space = document.querySelector("#padding").value / 10; };
+		document.querySelector("#padding").oninput = function(e){ space = document.querySelector("#padding").value / 10; 
+			spaceCur = space;
+		};
 		document.querySelector("#pNone").checked = true;
 		document.querySelector("#pNone").onclick = function(e){ padChange = 0; };
 		document.querySelector("#pInc").onclick = function(e){ padChange = 1; };
@@ -133,13 +140,13 @@ console.log("index.js loaded");
 		// `r` is the radius
 		// `space` is the "padding/spacing" between the dots
 		let a = n * celLIB.dtr(divergence);
-		let r = space * Math.sqrt(n);
+		let r = spaceCur * Math.sqrt(n);
 		
 		// Calculate
 		x = r * Math.cos(a) + mouseX;
 		y = r * Math.sin(a) + mouseY;
 		
-		radius = celLIB.increment(radius, sizeChange, change);
+		radiusCur = celLIB.increment(radiusCur, sizeChange, change);
 			
 		colorChange = celLIB.colorTransition(colorChange, colorStart, colorEnd);	
 		let color = `hsl(${colorChange/2 % 361},100%,50%)`;	
@@ -148,7 +155,7 @@ console.log("index.js loaded");
 		draw(x, y, color);
 				
 		// Alternate	
-		space = celLIB.increment(space, padChange, change);
+		spaceCur = celLIB.increment(spaceCur, padChange, change);
 		n++;
 	}
 		
@@ -162,6 +169,8 @@ console.log("index.js loaded");
 		// Reset
 		clearTimeout(animate);
 		n = 0;
+		radiusCur = radius;
+		spaceCur = space;
 		colorChange = colorStart;
 		stop = false;
 		loop();
@@ -172,23 +181,23 @@ console.log("index.js loaded");
 		switch(shape){
 			// Circle
 			case 0:
-				celLIB.drawCircle(ctx,x,y,radius,color);
+				celLIB.drawCircle(ctx,x,y,radiusCur,color);
 				break;
 			// Square
 			case 1:
-				celLIB.drawRectangle(ctx,x,y,radius*2,radius*2,color);
+				celLIB.drawRectangle(ctx,x,y,radiusCur*2,radiusCur*2,color);
 				break;	
 			// Triangle
 			case 2:
-				celLIB.drawTriangle(ctx,x,y,radius* 2,color);
+				celLIB.drawTriangle(ctx,x,y,radiusCur* 2,color);
 				break;
 			// Diamond
 			case 3:
-				celLIB.drawDiamond(ctx,x,y,radius* 2,color);
+				celLIB.drawDiamond(ctx,x,y,radiusCur* 2,color);
 				break;
 			// X
 			case 4:
-				celLIB.drawX(ctx,x,y,radius* 2,radius,color);
+				celLIB.drawX(ctx,x,y,radiusCur* 2,radiusCur,color);
 				break;
 		}
 	}
