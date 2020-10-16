@@ -1,21 +1,15 @@
-/*
-	main.js is primarily responsible for hooking up the UI to the rest of the application 
-	and setting up the main event loop
-*/
 
-// We will write the functions in this file in the traditional ES5 way
-// In this instance, we feel the code is more readable if written this way
-// If you want to re-write these as ES6 arrow functions, to be consistent with the other files, go ahead!
-
+// Imports
 import * as utils from './utils.js';
 import * as audio from './audio.js';
 import * as canvas from './canvas.js';
 
-// 1 - here we are faking an enumeration
+// Set default song
 const DEFAULTS = Object.freeze({
-	sound1  :  "media/how to train your dragon - Flying theme.mp3"
+	sound1  :  "media/Beetle Juice Theme Song.mp3"
 });
 
+// Enables
 const drawParams = {
 	showGradient	: true,
 	showBall		: true,
@@ -24,104 +18,112 @@ const drawParams = {
 	showEmboss 		: false
 };
 
+// Startup
 function init(){
+	// Set inital song
 	audio.setupWebaudio(DEFAULTS.sound1);
 
-	let canvasElement = document.querySelector("canvas"); // hookup <canvas> element
+	// Setups
+	let canvasElement = document.querySelector("canvas");
 	setupUI(canvasElement);
 	canvas.setupCanvas(canvasElement,audio.analyserNode);
 	
+	// Create ball
 	canvas.createBall();
+	
+	// Start Loop
 	loop();
 }
 
+// UI Setup
 function setupUI(canvasElement){
-  // A - hookup fullscreen button
-  const fsButton = document.querySelector("#fsButton");
 	
-  // add .onclick event to button
+  // Fullscreen Button
+  const fsButton = document.querySelector("#fsButton");
   fsButton.onclick = e => {
-    console.log("init called");
     utils.goFullscreen(canvasElement);
   };
   
-  // add .onclick event to button
+  // Play Button
   playButton.onclick = e => {
 	  
-	  // check if context is in suspended state (autoplay)
-	  if (audio.audioCtx.state == "suspended") {
+	  // Check if paused
+	  if (audio.audioCtx.state == "suspended")
 		  audio.audioCtx.resume();
-	  }
-
+	  
+	  // Flip Play and Pause Sound and Text
+	  // Play
 	  if (e.target.dataset.playing == "no") {
-		  // if track is currently paused, play italics
 		  audio.playCurrentSound();
-		  e.target.dataset.playing = "yes"; // our CSS will set the text to "Pause"
-		  // if track IS playing, pause italics
+		  e.target.dataset.playing = "yes";
+	  // Pause
 	  }else{
 		  audio.pauseCurrentSound();
-		  e.target.dataset.playing = "no"; // our CSS will set the text to "Play"
+		  e.target.dataset.playing = "no";
 	  }
   };
   
-  // C - hookup volume slider & label
+  // Volume Controls
   let volumeSlider = document.querySelector("#volumeSlider");
   let volumeLabel = document.querySelector("#volumeLabel");
   
-  // add .oninput event to slider
+  // Volume Control Changes
   volumeSlider.oninput = e => {
-	  // set the gain
+	  // Sound Change
 	  audio.setVolume(e.target.value);
-	  // update value of label to match value of slider
+	  // Text Change
 	  volumeLabel.innerHTML = Math.round((e.target.value/2 * 100));
   };
   
-  // set value of label to match initial value of slider
+  // Label = Value of slider
   volumeSlider.dispatchEvent(new Event("input"));
   
-  // D - hookup track <select>
+  // Track Select
   let trackSelect = document.querySelector("#trackSelect");
-  // add.onchange event to <select>
+  // Track Change
   trackSelect.onchange = e => {
 	  audio.loadSoundFile(e.target.value);
-	  // pause the current track if it is playing
+	  // Pause current
 	  if (playButton.dataset.playing = "yes") {
 		  playButton.dispatchEvent(new MouseEvent("click"));
 	  }
   };
   
-  
+  // Gradient Checkbox
   document.querySelector("#gradientCB").checked = true;
   document.querySelector("#gradientCB").oninput = function(e){ 
 		drawParams.showGradient = !drawParams.showGradient;
 	};
 	
+  // Ball Checkbox
   document.querySelector("#circlesCB").checked = true;
   document.querySelector("#circlesCB").oninput = function(e){ 
 		drawParams.showBall = !drawParams.showBall;
 	};
 	
+  // Noise Checkbox
   document.querySelector("#noiseCB").oninput = function(e){ 
 		drawParams.showNoise = !drawParams.showNoise;
 	};
 	
-	
+  // Invert Checkbox
   document.querySelector("#invertCB").oninput = function(e){ 
 		drawParams.showInvert = !drawParams.showInvert;
 	};
 	
+  // Emboss Checkbox
   document.querySelector("#embossCB").oninput = function(e){ 
 		drawParams.showEmboss = !drawParams.showEmboss;
 	};
 	
-} // end setupUI
+}
 
+// Loop
 function loop(){
 
 	requestAnimationFrame(loop);
 	
-	canvas.draw(drawParams);
-	
+	canvas.draw(drawParams);	
 }
 
 export {init};

@@ -1,35 +1,17 @@
-// Why are the all of these ES6 Arrow functions instead of regular JS functions?
-// No particular reason, actually, just that it's good for you to get used to this syntax
-// For Project 2 - any code added here MUST also use arrow function syntax
 
-const makeColor = (red, green, blue, alpha = 1) => {
-  return `rgba(${red},${green},${blue},${alpha})`;
-};
-
+// Random Num between Max-Min
 const getRandom = (min, max) => {
   return Math.random() * (max - min) + min;
 };
 
-const getRandomColor = () => {
-	const floor = 35; // so that colors are not too bright or too dark 
-  const getByte = () => getRandom(floor,255-floor);
-  return `rgba(${getByte()},${getByte()},${getByte()},1)`;
-};
-
-const getLinearGradient = (ctx,startX,startY,endX,endY,colorStops) => {
-  let lg = ctx.createLinearGradient(startX,startY,endX,endY);
-  for(let stop of colorStops){
-    lg.addColorStop(stop.percent,stop.color);
-  }
-  return lg;
-};
-
+// Random Unit Vector
 const getRandomUnitVector = () => {
 	let x = getRandom(-1,1);
 	let y = getRandom(-1,1);
 	let length = Math.sqrt(x*x + y*y);
-	if(length == 0){ // very unlikely
-		x=1; // point right
+	// Point Right
+	if(length == 0){
+		x=1;
 		y=0;
 		length = 1;
 	} else{
@@ -39,18 +21,27 @@ const getRandomUnitVector = () => {
 	return {x:x, y:y};
 };
 
+// Create gradient
+const getLinearGradient = (ctx,startX,startY,endX,endY,colorStops) => {
+  let lg = ctx.createLinearGradient(startX,startY,endX,endY);
+  for(let stop of colorStops){
+    lg.addColorStop(stop.percent,stop.color);
+  }
+  return lg;
+};
+
+// Make Fullscreen
 const goFullscreen = (element) => {
 	if (element.requestFullscreen) {
 		element.requestFullscreen();
 	} else if (element.mozRequestFullscreen) {
 		element.mozRequestFullscreen();
-	} else if (element.mozRequestFullScreen) { // camel-cased 'S' was changed to 's' in spec
+	} else if (element.mozRequestFullScreen) {
 		element.mozRequestFullScreen();
 	} else if (element.webkitRequestFullscreen) {
 		element.webkitRequestFullscreen();
 	}
-	// .. and do nothing if the method is not supported
 };
 
 
-export {makeColor, getRandomColor, getLinearGradient, getRandomUnitVector, goFullscreen};
+export {getRandom, getRandomUnitVector, getLinearGradient, goFullscreen};

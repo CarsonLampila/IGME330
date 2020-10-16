@@ -1,55 +1,57 @@
-/*
-	The purpose of this file is to take in the analyser node and a <canvas> element: 
-	  - the module will create a drawing context that points at the <canvas> 
-	  - it will store the reference to the analyser node
-	  - in draw(), it will loop through the data in the analyser node
-	  - and then draw something representative on the canvas
-	  - maybe a better name for this file/module would be *visualizer.js* ?
-*/
 
+// Imports
 import * as utils from './utils.js';
 import * as classes from './classes.js';
 
-
+// Canvas
 let ctx,canvasWidth,canvasHeight,gradient,analyserNode,audioData;
+
+// All Ball Objects
 let ball = [];
-let centerAngle = 0;
-let currentAngle = 0;
+
+// Rotation
+let centerAngle = 0, currentAngle = 0;
 let rotation = .0001;
 let radius = 25;
 
 
-
+// Setup Canvas
 function setupCanvas(canvasElement,analyserNodeRef){
-	// create drawing context
+	// Setup Context
 	ctx = canvasElement.getContext("2d");
 	canvasWidth = canvasElement.width;
 	canvasHeight = canvasElement.height;
-	// create a gradient that runs top to bottom
+	
+	// Gradient
 	gradient = utils.getLinearGradient(ctx,0,0,0,canvasHeight,[{percent:0,color:"#191970"},{percent:.25,color:"#0000FF"},{percent:.5,color:"#00BFFF"},{percent:.75,color:"#0000FF"},{percent:1,color:"#191970"}]);
-	// keep a reference to the analyser node
+	
+	// Audio
 	analyserNode = analyserNodeRef;
-	// this is the array where the analyser data will be stored
 	audioData = new Uint8Array(analyserNode.fftSize/10);
+	
+	// Establish Angle
 	centerAngle = ((2 * Math.PI) / audioData.length)
 }
 
+// Draw
 function draw(params={}){
-  // 1 - populate the audioData array with the frequency data from the analyserNode
-	// notice these arrays are passed "by reference" 
+
+	// Populate Analyser Node
 	analyserNode.getByteFrequencyData(audioData);
 	// OR
 	//analyserNode.getByteTimeDomainData(audioData); // waveform data
 	
-	// 2 - draw background
+	// Background
 	ctx.save();
 	ctx.fillStyle = "black";
 	ctx.globalAlpha = .1;
 	ctx.fillRect(0,0,canvasWidth,canvasHeight);
 	ctx.restore();
 		
-	// 3 - draw gradient
+	// Gradient Enable
 	if(params.showGradient){
+		
+		// Gradient Background
 		ctx.save();
 		ctx.fillStyle = gradient;
 		ctx.globalAlpha = .3;
@@ -57,70 +59,66 @@ function draw(params={}){
 		ctx.restore();
 	}
 	
-	// Draw Ball
+	// Ball Enable
 	if (params.showBall){
 		
+		// Add Bar Music
 		musicBall();
-		moveBall();	
-		drawBall();
 		
+		// Bounce Ball
+		moveBall();	
+		
+		// Draw Ball
+		drawBall();	
 	}
 		
-		
-		
-		
+			
 	
-	// 6 - bitmap manipulation
-	// TODO: right now. we are looping though every pixel of the canvas (320,000 of them!), 
-	// regardless of whether or not we are applying a pixel effect
-	// At some point, refactor this code so that we are looping though the image data only if
-	// it is necessary
-
-	// A) grab all of the pixels on the canvas and put them in the `data` array
-	// `imageData.data` is a `Uint8ClampedArray()` typed array that has 1.28 million elements!
-	// the variable `data` below is a reference to that array 
+	// Bitmap Manipulation
+	// Defenitions
 	let imageData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
 	let data = imageData.data;
 	let length = data.length;
-	let width = imageData.width; // not using here
-	// B) Iterate through each pixel, stepping 4 elements at a time (which is the RGBA for 1 pixel)
+	let width = imageData.width;
+	
+	// Loop through each pixel (pixel = 0 - 3 (RGBA))
 	for (let i = 0; i < length; i+= 4) {
-		// C) randomly change every 20th pixel to red
+		// Random Noise Enable
 		if (params.showNoise && Math.random() < .05) {
 			// data[i] is the red channel
 			// data[i+1] is the green channel
 			// data[i+2] is the blue channel
 			// data[i+3] is the alpha channel
-			data[i] = data[i+1] = data[i+2] = 255; // zero out the red and green and blue channels
-			//data[i] = 255; // make the red channel 100% red
-		} // end if
+			data[i] = data[i+1] = data[i+2] = 255; 
+		}
 		
-		// Draw invert
+		// Invert Enable
 		if(params.showInvert){
 			let red = data[i], green = data[i+1], blue = data[i+2];
-			data[i] = 255 - red;		// set red value
-			data[i+1] = 255 - green;	// set green value
-			data[i+2] = 255 - blue;		// set blue value
-			//data[i+3] is the alpha but we're leaving that alone
-		}
-	} // end for
-	
-	// Emboss
-	if(params.showEmboss){
-		// note we are stepping through *each* sub-pixel
-		for (let i = 0; i < length; i++) {
-			if (i%4 == 3) continue; // skip alpha channel
-			data[i] = 127 + 2*data[i] - data[i+4] - data[i+width*4];
+			// Negate values
+			data[i] = 255 - red;
+			data[i+1] = 255 - green;
+			data[i+2] = 255 - blue;
 		}
 	}
-
-		
 	
-	// D) copy data back to canvas
+	// Emboss Enable
+	if(params.showEmboss){
+		// Loop through every pixel + RGBA
+		for (let i = 0; i < length; i++) {
+			// Skip Alpha
+			if (i%4 == 3) 
+				continue;
+			// Effect
+			data[i] = 127 + 2*data[i] - data[i+4] - data[i+width*4];
+		}
+	}	
+	
+	// Reinput changed fata to Canvas
 	ctx.putImageData(imageData, 0, 0);
-	
 }
 
+// Create inital ball
 function createBall() {
 	// Bar Stats
 	let cX, cY, fX, fY, color;
@@ -152,7 +150,7 @@ function createBall() {
 		// Define color
 		color = `hsl(${currentColor/2 % 361},100%,50%)`;
 			
-		// Draw
+		// Draw bars
 		let bar = new classes.Sprite(cX, cY, cX, cY, barWidth, direction, speed, rotation, color);
 		bar.drawBar(ctx);
 		ball.push(bar);
@@ -163,62 +161,67 @@ function createBall() {
 	}
 }
 
-// #9 - standard "move and check world boundaries" code
+// Move the Ball and Bounce
 function moveBall(){
 
 	ctx.save();
 	
+	// Loop through all ball objects
 	for (let i = 0; i < ball.length; i++){
 		
-		
-		// move sprite
+		// Move based on vector
 		ball[i].move();
 	
-		// check sides and bounce
+		// X Bounce
 		if (ball[0].cX <= ball[0].size / 2  || ball[0].cX >= canvasWidth - ball[0].size / 2){
 			
 			ball[i].reflectX();
 			ball[i].move();
 		}
+		// Y Bounce
 		if (ball[0].cY <= ball[0].size / 2  || ball[0].cY >= canvasHeight - ball[0].size / 2){
 
 			ball[i].reflectY();
 			ball[i].move();
 		}
 		
-	}// end for
-
+	}
 	ctx.restore();
 }
 
-
+// Update bars for music
 function musicBall(){
+	
+	// Loop through ball objects except circle
 	for (let i = 1; i < ball.length; i++){
 		
+		// Update Close Bar
 		ball[i].cX = Math.cos(currentAngle) * (radius) + ball[0].cX;	
 		ball[i].cY = Math.sin(currentAngle) * (radius) + ball[0].cY;
 		
-		
+		// Update Far Bar
 		ball[i].fX = (Math.cos(currentAngle) * (audioData[i-1]/5)) + ball[i].cX;
 		ball[i].fY = (Math.sin(currentAngle) * (audioData[i-1]/5)) + ball[i].cY;
 		
+		// Rotate for each bar + rotation for spin
 		currentAngle += centerAngle + rotation;
 	}
-
 }
 
+// Redraw the Ball Objects
 function drawBall(){
 	
+	// Loop through ball objects
 	for (let i = 0; i < ball.length; i++){
 		
+		// Circle
 		if (i == 0){
 			ball[i].drawCircle(ctx);
-			
+		// Bars
 		} else {
 			ball[i].drawBar(ctx);
 		}		
 	}
 }
 
-
-export {setupCanvas,draw, createBall};
+export {setupCanvas, draw, createBall};
