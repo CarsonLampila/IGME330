@@ -8,8 +8,14 @@
 */
 
 import * as utils from './utils.js';
+import * as classes from './classes.js';
+
 
 let ctx,canvasWidth,canvasHeight,gradient,analyserNode,audioData;
+let ball = [];
+let centerAngle = 0;
+let currentAngle = 0;
+let rotation = 0;
 
 
 function setupCanvas(canvasElement,analyserNodeRef){
@@ -23,6 +29,7 @@ function setupCanvas(canvasElement,analyserNodeRef){
 	analyserNode = analyserNodeRef;
 	// this is the array where the analyser data will be stored
 	audioData = new Uint8Array(analyserNode.fftSize/10);
+	centerAngle = ((2 * Math.PI) / audioData.length)
 }
 
 function draw(params={}){
@@ -51,51 +58,15 @@ function draw(params={}){
 	// Draw Ball
 	if (params.showBall){
 		
-		let barSpacing = 4;
-		let margin = 5;
-		let screenWidthForBars = canvasWidth - (audioData.length * barSpacing) - margin * 2;
-		let barWidth = screenWidthForBars / audioData.length;
-		let barHeight = 200;
-		let topSpacing = 100;
+		musicBall();
+		moveBall();	
+		drawBall();
 		
-		let maxRadius = canvasHeight/4;
-		ctx.save();
-		ctx.globalAlpha = 0.5;
-		for (let i=0; i<audioData.length; i++) {
-			let percent = audioData[i] / 255;
-			let circleRadius = percent * maxRadius;
-			
-			ctx.save();
-			ctx.fillStyle = 'rgba(255,255,255,0.50)';
-			ctx.strokeStyle = 'rgba(0,0,0,0.50)';
-			
-		
-		
-			let centerAngle = ((2 * Math.PI) / audioData.length);
-			let currentAngle = 0;
-			let cLX, cLY, cRX, cRY, fLX, fLY, fRX, fRY;
-			let color = "red";
-			
-			//console.log("h");
-			// loop through the data and draw!
-			for(let i=0; i<audioData.length; i++) {
-
-				cLX = Math.cos(currentAngle) * (25) - (barWidth / 2) + canvasWidth/2;	
-				cLY = Math.sin(currentAngle) * (25) - (barWidth / 2)  + canvasHeight/2;		
-				cRX = cLX + barWidth;	
-				cRY = cLY + barWidth;			
-				fLX = Math.cos(currentAngle) * ((audioData[i]/3)) - (barWidth / 2) + canvasWidth/2;
-				fLY = Math.sin(currentAngle) * ((audioData[i]/3)) - (barWidth / 2) + canvasHeight/2;
-				fRX = fLX + barWidth;
-				fRY = fLY + barWidth;
-				utils.drawBar(ctx, cLX, cLY, cRX, cRY, fLX, fLY, fRX, fRY, color, color);
-				
-				currentAngle += centerAngle;
-			}
-			ctx.restore();		
-		}
-		ctx.restore();
 	}
+		
+		
+		
+		
 	
 	// 6 - bitmap manipulation
 	// TODO: right now. we are looping though every pixel of the canvas (320,000 of them!), 
@@ -148,4 +119,103 @@ function draw(params={}){
 	
 }
 
-export {setupCanvas,draw};
+function createBall() {
+	// Bar Stats
+	let cX, cY, fX, fY, color;
+	let radius = 25;
+	let barWidth = (200 / audioData.length);
+	let colorChange = 700/audioData.length;
+		
+	// Reset start angle and color
+	let currentColor = 0;
+	currentAngle = 0;
+		
+	// Movement
+	let speed = 2;	
+	let direction = utils.getRandomUnitVector();
+		
+		
+	// Draw center circle
+	let center = new classes.Sprite(canvasWidth/2, canvasHeight/2, canvasWidth/2, canvasHeight/2, radius, direction, speed, rotation, "white");
+	center.drawCircle(ctx);
+	ball.push(center);
+		
+		
+	// Loop through audio data to draw bars
+	for (let i=0; i<audioData.length; i++) {
+
+		// Define start and end of line with angle
+		cX = Math.cos(currentAngle) * (radius) + canvasWidth/2;	
+		cY = Math.sin(currentAngle) * (radius) + canvasHeight/2;					
+
+		// Define color
+		color = `hsl(${currentColor/2 % 361},100%,50%)`;
+			
+		// Draw
+		let bar = new classes.Sprite(cX, cY, cX, cY, barWidth, direction, speed, rotation, color);
+		bar.drawBar(ctx);
+		ball.push(bar);
+		
+		// Update angle and color
+		currentAngle += centerAngle;
+		currentColor += colorChange;
+	}
+}
+
+// #9 - standard "move and check world boundaries" code
+function moveBall(){
+
+	ctx.save();
+	
+	for (let i = 0; i < ball.length; i++){
+		
+		// move sprite
+		ball[i].move();
+	
+		// check sides and bounce
+		if (ball[0].cX <= ball[0].size / 2  || ball[0].cX >= canvasWidth - ball[0].size / 2){
+			
+			ball[i].reflectX();
+			ball[i].move();
+		}
+		if (ball[0].cY <= ball[0].size / 2  || ball[0].cY >= canvasHeight - ball[0].size / 2){
+
+			ball[i].reflectY();
+			ball[i].move();
+		}
+		
+	}// end for
+
+	ctx.restore();
+}
+
+
+function musicBall(){
+	for (let i = 1; i < ball.length; i++){
+		ball[i].fX = (Math.cos(currentAngle) * ((audioData[i-1]/5))) + ball[i].cX;
+		ball[i].fY = (Math.sin(currentAngle) * ((audioData[i-1]/5))) + ball[i].cY;
+		
+		currentAngle += centerAngle;
+	}
+
+}
+
+function drawBall(){
+	
+	rotation += .05;
+	
+	for (let i = 0; i < ball.length; i++){
+		
+		ball[i].updateRotate(rotation);
+		
+		if (i == 0){
+			ball[i].drawCircle(ctx);
+			
+		} else {
+			ball[i].drawBar(ctx);
+		}		
+	}
+}
+
+
+export {setupCanvas,draw, createBall};

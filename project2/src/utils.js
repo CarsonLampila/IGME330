@@ -24,6 +24,20 @@ const getLinearGradient = (ctx,startX,startY,endX,endY,colorStops) => {
   return lg;
 };
 
+const getRandomUnitVector = () => {
+	let x = getRandom(-1,1);
+	let y = getRandom(-1,1);
+	let length = Math.sqrt(x*x + y*y);
+	if(length == 0){ // very unlikely
+		x=1; // point right
+		y=0;
+		length = 1;
+	} else{
+		x /= length;
+		y /= length;
+	}
+	return {x:x, y:y};
+};
 
 const goFullscreen = (element) => {
 	if (element.requestFullscreen) {
@@ -38,21 +52,5 @@ const goFullscreen = (element) => {
 	// .. and do nothing if the method is not supported
 };
 
-// Draw Bar
-const drawBar = (ctx, cLX, cLY, cRX, cRY, fLX, fLY, fRX, fRY, fillStyle="black", strokeStyle="black") => {
-	ctx.save();
-	ctx.fillStyle = fillStyle;
- 	ctx.beginPath();
- 	ctx.moveTo(cLX, cLY);
- 	ctx.lineTo(fLX, fLY);
- 	ctx.lineTo(fRX, fRY);
-	ctx.lineTo(cRX, cRY);
-	ctx.lineTo(cLX, cLY);
- 	ctx.closePath();
-	ctx.strokeStyle = strokeStyle;
- 	ctx.stroke();
-	ctx.fill();
-	ctx.restore();
-};
 
-export {makeColor, getRandomColor, getLinearGradient, goFullscreen, drawBar};
+export {makeColor, getRandomColor, getLinearGradient, getRandomUnitVector, goFullscreen};
