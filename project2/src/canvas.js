@@ -15,7 +15,9 @@ let ctx,canvasWidth,canvasHeight,gradient,analyserNode,audioData;
 let ball = [];
 let centerAngle = 0;
 let currentAngle = 0;
-let rotation = 0;
+let rotation = .0001;
+let radius = 25;
+
 
 
 function setupCanvas(canvasElement,analyserNodeRef){
@@ -122,7 +124,6 @@ function draw(params={}){
 function createBall() {
 	// Bar Stats
 	let cX, cY, fX, fY, color;
-	let radius = 25;
 	let barWidth = (200 / audioData.length);
 	let colorChange = 700/audioData.length;
 		
@@ -169,6 +170,7 @@ function moveBall(){
 	
 	for (let i = 0; i < ball.length; i++){
 		
+		
 		// move sprite
 		ball[i].move();
 	
@@ -192,21 +194,22 @@ function moveBall(){
 
 function musicBall(){
 	for (let i = 1; i < ball.length; i++){
-		ball[i].fX = (Math.cos(currentAngle) * ((audioData[i-1]/5))) + ball[i].cX;
-		ball[i].fY = (Math.sin(currentAngle) * ((audioData[i-1]/5))) + ball[i].cY;
 		
-		currentAngle += centerAngle;
+		ball[i].cX = Math.cos(currentAngle) * (radius) + ball[0].cX;	
+		ball[i].cY = Math.sin(currentAngle) * (radius) + ball[0].cY;
+		
+		
+		ball[i].fX = (Math.cos(currentAngle) * (audioData[i-1]/5)) + ball[i].cX;
+		ball[i].fY = (Math.sin(currentAngle) * (audioData[i-1]/5)) + ball[i].cY;
+		
+		currentAngle += centerAngle + rotation;
 	}
 
 }
 
 function drawBall(){
 	
-	rotation += .05;
-	
 	for (let i = 0; i < ball.length; i++){
-		
-		ball[i].updateRotate(rotation);
 		
 		if (i == 0){
 			ball[i].drawCircle(ctx);

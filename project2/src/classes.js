@@ -14,13 +14,12 @@ class Sprite{
 	// Draw Bar
 	drawBar(ctx){
 		ctx.save();
-		ctx.beginPath();
 		ctx.lineWidth = this.size;
 		ctx.strokeStyle = this.color;
+		ctx.beginPath();
 		ctx.moveTo(this.cX, this.cY);
 		ctx.lineTo(this.fX, this.fY);
 		ctx.closePath();
-		ctx.rotate(this.rotateSpeed);
 		ctx.stroke();
 		ctx.restore();
 	}
@@ -30,9 +29,10 @@ class Sprite{
 		ctx.save();
 		ctx.fillStyle = this.color;
 		ctx.beginPath();
-		ctx.arc(this.cX, this.cY, this.size, 0, Math.PI * 2, false);
-		ctx.closePath();
+		ctx.translate(this.cX, this.cY)
 		ctx.rotate(this.rotateSpeed);
+		ctx.arc(0, 0, this.size, 0, Math.PI * 2, false);
+		ctx.closePath();
 		ctx.fill();
 		ctx.restore();
 	}
@@ -54,11 +54,6 @@ class Sprite{
 	// Y Bounce
 	reflectY(){
 		this.fwd.y *= -1;
-	}
-	
-	// Rotate
-	updateRotate(rotation){
-		this.rotateSpeed = rotation;
 	}
 }
 
