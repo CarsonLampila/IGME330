@@ -13,6 +13,7 @@ const DEFAULTS = Object.freeze({
 const drawParams = {
 	showGradient	: true,
 	showBall		: true,
+	showPaddle		: true,
 	showNoise		: false,
 	showInvert 		: false,
 	showEmboss 		: false
@@ -30,6 +31,9 @@ function init(){
 	
 	// Create ball
 	canvas.createBall();
+	
+	// Create Paddles
+	canvas.createPaddles();
 	
 	// Start Loop
 	loop();
@@ -99,6 +103,12 @@ function setupUI(canvasElement){
   document.querySelector("#circlesCB").checked = true;
   document.querySelector("#circlesCB").oninput = function(e){ 
 		drawParams.showBall = !drawParams.showBall;
+	};
+	
+  // Paddle Checkbox
+  document.querySelector("#paddlesCB").checked = true;
+  document.querySelector("#paddlesCB").oninput = function(e){ 
+		drawParams.showPaddle = !drawParams.showPaddle;
 	};
 	
   // Noise Checkbox
