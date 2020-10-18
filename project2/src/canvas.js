@@ -1,10 +1,9 @@
-
 // Imports
 import * as utils from './utils.js';
 import * as classes from './classes.js';
 
 // Canvas
-let ctx,canvasWidth,canvasHeight,gradient,analyserNode,audioData;
+let ctx,canvasWidth,canvasHeight,gradient,analyserNodeFreq,audioDataFreq,analyserNodeWave,audioDataWave;
 
 // Ball Object
 let ball;
@@ -17,9 +16,8 @@ let paddles = [];
 
 // Rotation
 let centerAngle = 0, currentAngle = 0;
-let rotation = .0001;
-let radius = 25;
 
+// Controls
 let lU = false, lD = false, rU = false, rD = false;
 
 
@@ -34,23 +32,21 @@ function setupCanvas(canvasElement,analyserNodeRef){
 	gradient = utils.getLinearGradient(ctx,0,0,0,canvasHeight,[{percent:0,color:"#191970"},{percent:.25,color:"#0000FF"},{percent:.5,color:"#00BFFF"},{percent:.75,color:"#0000FF"},{percent:1,color:"#191970"}]);
 	
 	// Audio
-	analyserNode = analyserNodeRef;
-	audioData = new Uint8Array(analyserNode.fftSize/8);
+	analyserNodeFreq = analyserNodeRef;
+	audioDataFreq = new Uint8Array(analyserNodeFreq.fftSize/8);
+	
+	analyserNodeWave = analyserNodeRef;
+	audioDataWave = new Uint8Array(analyserNodeWave.fftSize/2);
 	
 	// Establish Angle
-	centerAngle = ((2 * Math.PI) / audioData.length)
+	centerAngle = ((2 * Math.PI) / audioDataFreq.length)
 }
 
 // Draw
 function draw(params={}){
 
-	// Frequency vs Waveform
-	if(params.freqWave){
-		analyserNode.getByteFrequencyData(audioData); // Frequency
-	} else {
-		analyserNode.getByteTimeDomainData(audioData); // Waveform 
-	}
-		
+	analyserNodeFreq.getByteFrequencyData(audioDataFreq); // Frequency
+	analyserNodeWave.getByteTimeDomainData(audioDataWave); // Waveform 	
 	
 	// Background
 	ctx.save();
@@ -73,15 +69,10 @@ function draw(params={}){
 	// Bounce Ball
 	moveBall();	
 	
-	// Reset Pos when out of X bounds
+	// Reset Pos when out of X and Y bounds
 	if (ball.cX + (ball.size * 3) < 0 ||
-		ball.cX - (ball.size * 3) > canvasWidth){
-				
-		bars = []
-		createBall();
-	}
-	// Reset Pos when out of Y bounds
-	if (ball.cY + (ball.size * 3) < 0 ||
+		ball.cX - (ball.size * 3) > canvasWidth ||
+		ball.cY + (ball.size * 3) < 0 ||
 		ball.cY - (ball.size * 3) > canvasHeight){
 				
 		bars = []
@@ -90,16 +81,23 @@ function draw(params={}){
 	
 	// Ball Enable
 	if (params.showBall){
-	
-		ball.draw(ctx);		
+		
+		// Freq or Wave
+		if (params.freqWaveCir)	
+			ball.draw(ctx, audioDataFreq);		
+		else
+			ball.draw(ctx, audioDataWave);	
 	}  
 	
 	
 	// Bar Enable
 	if (params.showBars){
 		
-		// Add Bar Music
-		musicBall();
+		// Add Bar Music Freq or Wave
+		if (params.freqWaveBar)	
+			musicBars(audioDataFreq);
+		else
+			musicBars(audioDataWave);
 		
 		// Loop through ball objects
 		for (let i = 0; i < bars.length; i++){
@@ -173,8 +171,9 @@ function draw(params={}){
 function createBall() {
 	// Bar Stats
 	let cX, cY, fX, fY, color;
-	let barWidth = (200 / audioData.length);
-	let colorChange = 700/audioData.length;
+	let radius = 30;
+	let barWidth = (200 / audioDataFreq.length);
+	let colorChange = 700/audioDataFreq.length;
 		
 	// Reset start angle and color
 	let currentColor = 0;
@@ -192,16 +191,15 @@ function createBall() {
 	let direction = tempDir	
 		
 	// Draw center circle
-
-	ball = new classes.CircleSprite(canvasWidth/2, canvasHeight/2, radius, direction, speed, "white");
-		
+	ball = new classes.CircleSprite(canvasWidth/2, canvasHeight/2, radius, direction, speed, "white", audioDataWave);
+	
 		
 	// Loop through audio data to draw bars
-	for (let i=0; i<audioData.length; i++) {
+	for (let i=0; i<audioDataFreq.length; i++) {
 
 		// Define start and end of line with angle
 		cX = Math.cos(currentAngle) * (radius) + canvasWidth/2;	
-		cY = Math.sin(currentAngle) * (radius) + canvasHeight/2;					
+		cY = Math.sin(currentAngle) * (radius) + canvasHeight/2;		
 
 		// Define color
 		color = `hsl(${currentColor/2 % 361},100%,50%)`;
@@ -342,18 +340,20 @@ function moveBall(){
 }
 
 // Update bars for music
-function musicBall(){
+function musicBars(audio){
+	
+	let rotation = .0001;
 	
 	// Loop through ball objects except circle
 	for (let i = 0; i < bars.length; i++){
 		
 		// Update Close Bar
-		bars[i].cX = Math.cos(currentAngle) * (radius) + ball.cX;	
-		bars[i].cY = Math.sin(currentAngle) * (radius) + ball.cY;
+		bars[i].cX = Math.cos(currentAngle) * ball.size + ball.cX;	
+		bars[i].cY = Math.sin(currentAngle) * ball.size + ball.cY;
 		
 		// Update Far Bar
-		bars[i].fX = (Math.cos(currentAngle) * (audioData[i]/5)) + bars[i].cX;
-		bars[i].fY = (Math.sin(currentAngle) * (audioData[i]/5)) + bars[i].cY;
+		bars[i].fX = (Math.cos(currentAngle) * (audio[i]/5)) + bars[i].cX;
+		bars[i].fY = (Math.sin(currentAngle) * (audio[i]/5)) + bars[i].cY;
 		
 		// Rotate for each bar + rotation for spin
 		currentAngle += centerAngle + rotation;

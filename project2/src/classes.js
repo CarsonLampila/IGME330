@@ -1,3 +1,5 @@
+import * as utils from './utils.js';
+
 class Sprite{
 	constructor(cX=0, cY=0, fwd={x:1,y:0}, translateSpeed=0, color="black")
 	{
@@ -56,19 +58,39 @@ class CircleSprite extends Sprite{
 		//this.rotateSpeed = rotateSpeed;
 	}
 	
-	// Draw Circles
-	draw(ctx){
+	draw(ctx, audio){
 		ctx.save();
-		ctx.fillStyle = this.color;
-		ctx.beginPath();
-		//ctx.translate(this.cX, this.cY)
-		//ctx.rotate(this.rotateSpeed);
-		//ctx.arc(0, 0, this.size, 0, Math.PI * 2, false);
-		ctx.arc(this.cX, this.cY, this.size, 0, Math.PI * 2, false);
-		ctx.closePath();
-		ctx.fill();
+		ctx.globalAlpha = 0.5;
+		for (let i = 0; i < audio.length; i++) {
+			let percent = audio[i] / 255;
+			let circleRadius = percent * this.size;
+
+	
+			// Outer
+			ctx.beginPath();
+			ctx.fillStyle = utils.makeColor(0, 18, 81, .10 - percent/10.0);
+			ctx.arc(this.cX, this.cY, circleRadius * 1.5, 0, 2 * Math.PI, false);
+			ctx.fill();
+			ctx.closePath();
+			
+			// Middle
+			ctx.beginPath();
+			ctx.fillStyle = utils.makeColor(19, 56, 190, .34 - percent/3.0);
+			ctx.arc(this.cX, this.cY, circleRadius, 0, 2 * Math.PI, false);
+			ctx.fill();
+			ctx.closePath();
+			
+			// Center
+			ctx.save();
+			ctx.beginPath();
+			ctx.fillStyle = utils.makeColor(0, 219, 255, .5 - percent/5.0);
+			ctx.arc(this.cX, this.cY, circleRadius * 0.50, 0, 2 * Math.PI, false);
+			ctx.fill();
+			ctx.closePath();
+			ctx.restore();
+		}
 		ctx.restore();
-	}
+	}	
 }
 
 class RectSprite extends Sprite{

@@ -11,8 +11,9 @@ const DEFAULTS = Object.freeze({
 
 // Enables
 const drawParams = {
-	freqWave 		: true,
 	showGradient	: true,
+	freqWaveCir    	: false,
+	freqWaveBar    	: true,
 	showBall		: true,
 	showBars		: true,
 	showPaddle		: true,
@@ -95,16 +96,21 @@ function setupUI(canvasElement){
 	  }
   };
   
-  // Freq/Wave Checkbox
-  document.querySelector("#modeCB").checked = true;
-  document.querySelector("#modeCB").oninput = function(e){ 
-		drawParams.freqWave = !drawParams.freqWave;
-	};
-  
   // Gradient Checkbox
   document.querySelector("#gradientCB").checked = true;
   document.querySelector("#gradientCB").oninput = function(e){ 
 		drawParams.showGradient = !drawParams.showGradient;
+	};
+	
+  // Freq/Wave Circle Checkbox
+  document.querySelector("#freqWaveCirCB").oninput = function(e){ 
+		drawParams.freqWaveCir = !drawParams.freqWaveCir;
+	};
+	
+  // Freq/Wave Bar Checkbox
+  document.querySelector("#freqWaveBarCB").checked = true;
+  document.querySelector("#freqWaveBarCB").oninput = function(e){ 
+		drawParams.freqWaveBar = !drawParams.freqWaveBar;
 	};
 	
   // Ball Checkbox

@@ -30,6 +30,10 @@ const getLinearGradient = (ctx,startX,startY,endX,endY,colorStops) => {
   return lg;
 };
 
+const makeColor = (red, green, blue, alpha = 1) => {
+  return `rgba(${red},${green},${blue},${alpha})`;
+};
+
 // Make Fullscreen
 const goFullscreen = (element) => {
 	if (element.requestFullscreen) {
@@ -44,4 +48,4 @@ const goFullscreen = (element) => {
 };
 
 
-export {getRandom, getRandomUnitVector, getLinearGradient, goFullscreen};
+export {getRandom, getRandomUnitVector, getLinearGradient, makeColor, goFullscreen};
