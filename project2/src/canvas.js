@@ -14,11 +14,18 @@ let bars = [];
 // All Paddle Objects
 let paddles = [];
 
+// All curve objects
+let curves = [];
+let tempPos = 0;
+let dirChange = false;
+
 // Rotation
 let centerAngle = 0, currentAngle = 0;
 
 // Controls
 let lU = false, lD = false, rU = false, rD = false;
+
+
 
 
 // Setup Canvas
@@ -33,8 +40,7 @@ function setupCanvas(canvasElement,analyserNodeRef){
 	
 	// Audio
 	analyserNodeFreq = analyserNodeRef;
-	audioDataFreq = new Uint8Array(analyserNodeFreq.fftSize/8);
-	
+	audioDataFreq = new Uint8Array(analyserNodeFreq.fftSize/8);	
 	analyserNodeWave = analyserNodeRef;
 	audioDataWave = new Uint8Array(analyserNodeWave.fftSize/2);
 	
@@ -42,11 +48,13 @@ function setupCanvas(canvasElement,analyserNodeRef){
 	centerAngle = ((2 * Math.PI) / audioDataFreq.length)
 }
 
+
 // Draw
 function draw(params={}){
-
+	// Audio
 	analyserNodeFreq.getByteFrequencyData(audioDataFreq); // Frequency
 	analyserNodeWave.getByteTimeDomainData(audioDataWave); // Waveform 	
+
 	
 	// Background
 	ctx.save();
@@ -99,9 +107,21 @@ function draw(params={}){
 		else
 			musicBars(audioDataWave);
 		
-		// Loop through ball objects
+		// Loop through bar objects and draw
 		for (let i = 0; i < bars.length; i++){
 			bars[i].draw(ctx);	
+		}	
+	}
+	
+	// Curves Enable
+	if (params.showCurves){
+		
+		// Wave data curves
+		musicCurves();
+		
+		// Loop through curve objects and draw
+		for (let i = 0; i < curves.length; i++){
+			curves[i].draw(ctx);	
 		}	
 	}
 	
@@ -114,11 +134,13 @@ function draw(params={}){
 		document.addEventListener('keyup', depress);
 		movePaddles();
 		
-		// Loop through paddle objects
+		// Loop through paddle objects and draw
 		for (let i = 0; i < paddles.length; i++){
 			paddles[i].draw(ctx);	
 		}		
 	}
+	
+
 	
 		
 			
@@ -486,6 +508,92 @@ function movePaddles(){
 	}
 }
 
+// Create initial quadratic curves
+function createCurves(){
+	
+	// Curve variables
+	let speed = 10;
+	let color = "black";
+	let lineWidth = 1;
+	let vectorTL = {x:.1, y:.1};
+	let vectorTR = {x:-.1, y:.1};
+	let vectorBL = {x:.1, y:-.1};
+	let vectorBR = {x:-.1, y:-.1};
+
+	// Top Left Curve
+	let tlCurve = new classes.CurveSprite(0, canvasHeight/2, vectorTL, speed, color, lineWidth, canvasWidth/2, 0, canvasWidth*.05, canvasHeight*.05);
+	curves.push(tlCurve);
+	
+	// Top Right Curve
+	let trCurve = new classes.CurveSprite(canvasWidth, canvasHeight/2, vectorTR, speed, color, lineWidth, canvasWidth/2, 0, canvasWidth*.95, canvasHeight*.05);
+	curves.push(trCurve);
+	
+	// Bottom Left Curve
+	let blCurve = new classes.CurveSprite(0, canvasHeight/2, vectorBL, speed, color, lineWidth, canvasWidth/2, canvasHeight, canvasWidth*.05, canvasHeight*.95);
+	curves.push(blCurve);
+	
+	// Bottom Right Curve
+	let brCurve = new classes.CurveSprite(canvasWidth, canvasHeight/2, vectorBR, speed, color, lineWidth, canvasWidth/2, canvasHeight, canvasWidth*.95, canvasHeight*.95);
+	curves.push(brCurve);
+}
+
+// Update curves for music
+function musicCurves(){
+		
+	// Define curve change
+	let percent = audioDataWave[0] / 255;
+	let circlePos = percent * 10;
+	
+	// Loo through curves
+	for(let i = 0; i < curves.length; i++){
+		
+		// Move curve
+		curves[i].move();
+		
+		// Reflect at X Limits
+		if (curves[i].mX > canvasWidth || curves[i].mX < 0){
+			curves[i].reflectX();
+			curves[i].reflectY();
+			curves[i].move();
+		}
+		
+		// Reflect at Y Limits
+		if (curves[i].mY > canvasHeight || curves[i].mY < 0){	
+			curves[i].reflectX();
+			curves[i].reflectY();
+			curves[i].move();
+		}
+		
+		// Reflect on positive or negative change to music
+		// Positive
+		if (dirChange){
+			if (circlePos > tempPos){
+				for (let j = 0; j < curves.length; j++){
+					curves[j].reflectX();
+					curves[j].reflectY();
+					curves[j].move();
+				}
+				// Flip needed change
+				dirChange = !dirChange;
+			}
+		} 
+		// Negative
+		else {
+			if (circlePos < tempPos){
+				for (let j = 0; j < curves.length; j++){
+					curves[j].reflectX();
+					curves[j].reflectY();
+					curves[j].move();
+				}
+				// Flip needed change
+				dirChange = !dirChange;
+			}
+		}
+		// Update previous music position
+		tempPos = circlePos;			
+	}
+}
 
 
-export {setupCanvas, draw, createBall, createPaddles};
+
+export {setupCanvas, draw, createBall, createPaddles, createCurves};

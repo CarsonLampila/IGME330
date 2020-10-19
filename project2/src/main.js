@@ -17,6 +17,7 @@ const drawParams = {
 	showBall		: true,
 	showBars		: true,
 	showPaddle		: true,
+	showCurves		: true,
 	showNoise		: false,
 	showInvert 		: false,
 	showEmboss 		: false
@@ -37,6 +38,9 @@ function init(){
 	
 	// Create Paddles
 	canvas.createPaddles();
+	
+	// Create curvesCB
+	canvas.createCurves();
 	
 	// Start Loop
 	loop();
@@ -129,6 +133,12 @@ function setupUI(canvasElement){
   document.querySelector("#paddlesCB").checked = true;
   document.querySelector("#paddlesCB").oninput = function(e){ 
 		drawParams.showPaddle = !drawParams.showPaddle;
+	};
+	
+  // Curve Checkbox
+  document.querySelector("#curvesCB").checked = true;
+  document.querySelector("#curvesCB").oninput = function(e){ 
+		drawParams.showCurves = !drawParams.showCurves;
 	};
 	
   // Noise Checkbox

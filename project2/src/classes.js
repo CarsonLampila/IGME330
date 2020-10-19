@@ -53,7 +53,7 @@ class BarSprite extends Sprite{
 
 class CircleSprite extends Sprite{
 	constructor(cX=0, cY=0, size=1, fwd={x:1,y:0}, translateSpeed=0, color="black"){
-		super(cX, cY, fwd, translateSpeed, color)
+		super(cX, cY, fwd, translateSpeed, color);
 		this.size = size;
 		//this.rotateSpeed = rotateSpeed;
 	}
@@ -95,7 +95,7 @@ class CircleSprite extends Sprite{
 
 class RectSprite extends Sprite{
 	constructor(cX=0, cY=0, width=1, height=1, fwd={x:0,y:1}, translateSpeed=0, color="black", lineWidth=0, lineColor="white"){
-		super(cX, cY, fwd, translateSpeed, color)
+		super(cX, cY, fwd, translateSpeed, color);
 		this.width = width;
 		this.height = height;
 		this.lineWidth = lineWidth;
@@ -116,7 +116,36 @@ class RectSprite extends Sprite{
 	}
 }
 
+class CurveSprite extends Sprite{
+	constructor(cX=0, cY=0, fwd={x:0,y:0}, translateSpeed=0, color="black", lineWidth=1, fX, fY, mX, mY){
+		super(cX, cY, fwd, translateSpeed, color)
+		this.lineWidth = lineWidth;
+		this.fX = fX;
+		this.fY = fY;
+		this.mX = mX;
+		this.mY = mY;
+	}
+	
+	draw(ctx){
+		
+		ctx.save();
+		ctx.lineWidth = this.lineWidth;
+		ctx.strokeStyle = this.color;
 
-export {Sprite, BarSprite, CircleSprite, RectSprite};
+		ctx.beginPath();
+		ctx.moveTo(this.cX, this.cY);
+		ctx.quadraticCurveTo(this.mX, this.mY, this.fX, this.fY);
+		ctx.stroke();
+		ctx.restore();
+	}
+	
+	move(){
+		this.mX += this.translateSpeed * this.fwd.x;
+		this.mY += this.translateSpeed * this.fwd.y;
+	}
+}
+
+
+export {Sprite, BarSprite, CircleSprite, RectSprite, CurveSprite};
 	
 
