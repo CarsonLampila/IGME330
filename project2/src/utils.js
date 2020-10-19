@@ -30,8 +30,8 @@ const getLinearGradient = (ctx,startX,startY,endX,endY,colorStops) => {
   return lg;
 };
 
-const makeColor = (red, green, blue, alpha = 1) => {
-  return `rgba(${red},${green},${blue},${alpha})`;
+const makeColor = (color = 0) => {
+  return `hsl(${color/2 % 361},100%,50%)`;
 };
 
 // Make Fullscreen

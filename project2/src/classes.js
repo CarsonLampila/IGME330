@@ -55,9 +55,8 @@ class CircleSprite extends Sprite{
 	constructor(cX=0, cY=0, size=1, fwd={x:1,y:0}, translateSpeed=0, color="black"){
 		super(cX, cY, fwd, translateSpeed, color);
 		this.size = size;
-		//this.rotateSpeed = rotateSpeed;
 	}
-	
+	// Draw Circle
 	draw(ctx, audio){
 		ctx.save();
 		ctx.globalAlpha = 0.5;
@@ -65,32 +64,41 @@ class CircleSprite extends Sprite{
 			let percent = audio[i] / 255;
 			let circleRadius = percent * this.size;
 
-	
-			// Outer
-			ctx.beginPath();
-			ctx.fillStyle = utils.makeColor(0, 18, 81, .10 - percent/10.0);
-			ctx.arc(this.cX, this.cY, circleRadius * 1.5, 0, 2 * Math.PI, false);
-			ctx.fill();
-			ctx.closePath();
-			
-			// Middle
-			ctx.beginPath();
-			ctx.fillStyle = utils.makeColor(19, 56, 190, .34 - percent/3.0);
-			ctx.arc(this.cX, this.cY, circleRadius, 0, 2 * Math.PI, false);
-			ctx.fill();
-			ctx.closePath();
-			
 			// Center
 			ctx.save();
 			ctx.beginPath();
-			ctx.fillStyle = utils.makeColor(0, 219, 255, .5 - percent/5.0);
+			ctx.fillStyle = utils.makeColor(this.color);
 			ctx.arc(this.cX, this.cY, circleRadius * 0.50, 0, 2 * Math.PI, false);
 			ctx.fill();
 			ctx.closePath();
 			ctx.restore();
+	
+			// Middle
+			ctx.beginPath();
+			ctx.fillStyle = utils.makeColor(this.color + 75);
+			ctx.arc(this.cX, this.cY, circleRadius, 0, 2 * Math.PI, false);
+			ctx.fill();
+			ctx.closePath();
+	
+			// Outer
+			ctx.beginPath();
+			ctx.fillStyle = utils.makeColor(this.color + 150);
+			ctx.arc(this.cX, this.cY, circleRadius * 1.5, 0, 2 * Math.PI, false);
+			ctx.fill();
+			ctx.closePath();
 		}
 		ctx.restore();
 	}	
+	// X Bounce
+	reflectX(){
+		this.fwd.x *= -1;
+		this.color += 50;
+	}
+	// Y Bounce
+	reflectY(){
+		this.fwd.y *= -1;
+		this.color += 50;
+	}
 }
 
 class RectSprite extends Sprite{
@@ -125,20 +133,18 @@ class CurveSprite extends Sprite{
 		this.mX = mX;
 		this.mY = mY;
 	}
-	
-	draw(ctx){
-		
+	// Draw Quadratic Curves
+	draw(ctx){	
 		ctx.save();
 		ctx.lineWidth = this.lineWidth;
 		ctx.strokeStyle = this.color;
-
 		ctx.beginPath();
 		ctx.moveTo(this.cX, this.cY);
 		ctx.quadraticCurveTo(this.mX, this.mY, this.fX, this.fY);
 		ctx.stroke();
 		ctx.restore();
 	}
-	
+	// Move middle points
 	move(){
 		this.mX += this.translateSpeed * this.fwd.x;
 		this.mY += this.translateSpeed * this.fwd.y;

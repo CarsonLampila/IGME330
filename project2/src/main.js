@@ -11,6 +11,7 @@ const DEFAULTS = Object.freeze({
 
 // Enables
 const drawParams = {
+	paused			: true,
 	showGradient	: true,
 	freqWaveCir    	: false,
 	freqWaveBar    	: true,
@@ -33,14 +34,15 @@ function init(){
 	setupUI(canvasElement);
 	canvas.setupCanvas(canvasElement,audio.analyserNode);
 	
+	// Create curvesCB
+	canvas.createCurves();
+	
 	// Create ball
 	canvas.createBall();
 	
 	// Create Paddles
 	canvas.createPaddles();
 	
-	// Create curvesCB
-	canvas.createCurves();
 	
 	// Start Loop
 	loop();
@@ -61,16 +63,19 @@ function setupUI(canvasElement){
 	  // Check if paused
 	  if (audio.audioCtx.state == "suspended")
 		  audio.audioCtx.resume();
-	  
+
+
 	  // Flip Play and Pause Sound and Text
 	  // Play
 	  if (e.target.dataset.playing == "no") {
 		  audio.playCurrentSound();
 		  e.target.dataset.playing = "yes";
+		  drawParams.paused = false;
 	  // Pause
 	  }else{
 		  audio.pauseCurrentSound();
 		  e.target.dataset.playing = "no";
+		  drawParams.paused = true;
 	  }
   };
   

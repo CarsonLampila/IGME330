@@ -3,7 +3,7 @@ import * as utils from './utils.js';
 import * as classes from './classes.js';
 
 // Canvas
-let ctx,canvasWidth,canvasHeight,gradient,analyserNodeFreq,audioDataFreq,analyserNodeWave,audioDataWave;
+let ctx,canvasWidth,canvasHeight,gradient,analyserNodeFreq,audioDataFreq,analyserNodeWave,audioDataWave, audio;
 
 // Ball Object
 let ball;
@@ -74,18 +74,28 @@ function draw(params={}){
 		ctx.restore();
 	}
 	
-	// Bounce Ball
-	moveBall();	
+	// Pause
+	if (params.paused == false){
+		
+		// Bounce Ball
+		moveBall();	
 	
-	// Reset Pos when out of X and Y bounds
-	if (ball.cX + (ball.size * 3) < 0 ||
-		ball.cX - (ball.size * 3) > canvasWidth ||
-		ball.cY + (ball.size * 3) < 0 ||
-		ball.cY - (ball.size * 3) > canvasHeight){
+		// Reset Pos when out of X and Y bounds
+		if (ball.cX + (ball.size * 3) < 0 ||
+			ball.cX - (ball.size * 3) > canvasWidth ||
+			ball.cY + (ball.size * 3) < 0 ||
+			ball.cY - (ball.size * 3) > canvasHeight){
 				
-		bars = []
-		createBall();
+			bars = []
+			createBall();
+		}
 	}
+
+	
+	
+	
+	
+
 	
 	// Ball Enable
 	if (params.showBall){
@@ -213,7 +223,7 @@ function createBall() {
 	let direction = tempDir	
 		
 	// Draw center circle
-	ball = new classes.CircleSprite(canvasWidth/2, canvasHeight/2, radius, direction, speed, "white", audioDataWave);
+	ball = new classes.CircleSprite(canvasWidth/2, canvasHeight/2, radius, direction, speed, 0, audioDataWave);
 	
 		
 	// Loop through audio data to draw bars
@@ -224,7 +234,7 @@ function createBall() {
 		cY = Math.sin(currentAngle) * (radius) + canvasHeight/2;		
 
 		// Define color
-		color = `hsl(${currentColor/2 % 361},100%,50%)`;
+		color = utils.makeColor(currentColor);
 			
 		// Draw bars
 		let bar = new classes.BarSprite(cX, cY, cX, cY, barWidth, direction, speed, color);
@@ -512,7 +522,7 @@ function movePaddles(){
 function createCurves(){
 	
 	// Curve variables
-	let speed = 10;
+	let speed = 15;
 	let color = "black";
 	let lineWidth = 1;
 	let vectorTL = {x:.1, y:.1};
@@ -544,7 +554,7 @@ function musicCurves(){
 	let percent = audioDataWave[0] / 255;
 	let circlePos = percent * 10;
 	
-	// Loo through curves
+	// Loop through curves
 	for(let i = 0; i < curves.length; i++){
 		
 		// Move curve
