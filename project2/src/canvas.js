@@ -3,7 +3,7 @@ import * as utils from './utils.js';
 import * as classes from './classes.js';
 
 // Canvas
-let ctx,canvasWidth,canvasHeight,gradient,analyserNodeFreq,audioDataFreq,analyserNodeWave,audioDataWave, audio;
+let ctx,canvasWidth,canvasHeight,gradient,analyserNodeFreq,audioDataFreq,analyserNodeWave,audioDataWave, audio, pButton;
 
 // Ball Object
 let ball;
@@ -25,11 +25,16 @@ let centerAngle = 0, currentAngle = 0;
 // Controls
 let lU = false, lD = false, rU = false, rD = false;
 
+let ballSize = 30;
+let ballSpeed = 1.5;
+let paddleSize = 135;
+let paddleSpeed = 3;
+
 
 
 
 // Setup Canvas
-function setupCanvas(canvasElement,analyserNodeRef){
+function setupCanvas(canvasElement,analyserNodeRef, playButton){
 	// Setup Context
 	ctx = canvasElement.getContext("2d");
 	canvasWidth = canvasElement.width;
@@ -39,18 +44,21 @@ function setupCanvas(canvasElement,analyserNodeRef){
 	gradient = utils.getLinearGradient(ctx,0,0,0,canvasHeight,[{percent:0,color:"#191970"},{percent:.25,color:"#0000FF"},{percent:.5,color:"#00BFFF"},{percent:.75,color:"#0000FF"},{percent:1,color:"#191970"}]);
 	
 	// Audio
-	analyserNodeFreq = analyserNodeRef;
+	audio = analyserNodeRef;
+	analyserNodeFreq = analyserNodeRef.analyserNode;
 	audioDataFreq = new Uint8Array(analyserNodeFreq.fftSize/8);	
-	analyserNodeWave = analyserNodeRef;
+	analyserNodeWave = analyserNodeRef.analyserNode;
 	audioDataWave = new Uint8Array(analyserNodeWave.fftSize/2);
 	
 	// Establish Angle
 	centerAngle = ((2 * Math.PI) / audioDataFreq.length)
+	
+	pButton = playButton;
 }
 
 
 // Draw
-function draw(params={}){
+function draw(params={}, ctrls={}){
 	// Audio
 	analyserNodeFreq.getByteFrequencyData(audioDataFreq); // Frequency
 	analyserNodeWave.getByteTimeDomainData(audioDataWave); // Waveform 	
@@ -74,7 +82,6 @@ function draw(params={}){
 		ctx.restore();
 	}
 	
-	// Pause
 	if (params.paused == false){
 		
 		// Bounce Ball
@@ -88,17 +95,19 @@ function draw(params={}){
 				
 			bars = []
 			createBall();
+			
+			audio.pauseCurrentSound();
+			pButton.dataset.playing = "no";
+			params.paused = true;
 		}
 	}
 
 	
-	
-	
-	
-
-	
 	// Ball Enable
 	if (params.showBall){
+		
+		ball.size = ballSize;
+		ball.speed = ctrls.ballSpeed;
 		
 		// Freq or Wave
 		if (params.freqWaveCir)	
@@ -139,6 +148,7 @@ function draw(params={}){
 	// Paddle Enable
 	if (params.showPaddle){
 
+
 		// Move paddles
 		document.addEventListener('keydown', press);
 		document.addEventListener('keyup', depress);
@@ -146,6 +156,15 @@ function draw(params={}){
 		
 		// Loop through paddle objects and draw
 		for (let i = 0; i < paddles.length; i++){
+			if (i == 0 || i == 1){
+				paddles[i].height = ctrls.paddleSize;
+				paddles[i].speed = ctrls.paddleSpeed;
+			}
+			else{
+				paddles[i].width = ctrls.paddleSize;
+				paddles[i].speed = ctrls.paddleSpeed * 2.5;
+			}
+			
 			paddles[i].draw(ctx);	
 		}		
 	}
@@ -203,16 +222,13 @@ function draw(params={}){
 function createBall() {
 	// Bar Stats
 	let cX, cY, fX, fY, color;
-	let radius = 30;
 	let barWidth = (200 / audioDataFreq.length);
 	let colorChange = 700/audioDataFreq.length;
+	
 		
 	// Reset start angle and color
 	let currentColor = 0;
 	currentAngle = 0;
-		
-	// Movement
-	let speed = 2;
 
 	// Make sure direction is not up and down
 	let tempDir = utils.getRandomUnitVector();
@@ -223,21 +239,21 @@ function createBall() {
 	let direction = tempDir	
 		
 	// Draw center circle
-	ball = new classes.CircleSprite(canvasWidth/2, canvasHeight/2, radius, direction, speed, 0, audioDataWave);
+	ball = new classes.CircleSprite(canvasWidth/2, canvasHeight/2, ballSize, direction, ballSpeed, 0, audioDataWave);
 	
 		
 	// Loop through audio data to draw bars
 	for (let i=0; i<audioDataFreq.length; i++) {
 
 		// Define start and end of line with angle
-		cX = Math.cos(currentAngle) * (radius) + canvasWidth/2;	
-		cY = Math.sin(currentAngle) * (radius) + canvasHeight/2;		
+		cX = Math.cos(currentAngle) * ballSize + canvasWidth/2;	
+		cY = Math.sin(currentAngle) * ballSize + canvasHeight/2;		
 
 		// Define color
 		color = utils.makeColor(currentColor);
 			
 		// Draw bars
-		let bar = new classes.BarSprite(cX, cY, cX, cY, barWidth, direction, speed, color);
+		let bar = new classes.BarSprite(cX, cY, cX, cY, barWidth, direction, ballSpeed, color);
 		bars.push(bar);
 		
 		// Update angle and color
@@ -398,18 +414,17 @@ function createPaddles() {
 
 	// Paddle Stats
 	let width = canvasWidth * .02;
-	let height = canvasHeight / 3;
+	let height = paddleSize;
 	let cX = canvasWidth - 1.5 * width;
 	let	cY = canvasHeight - height;
 	let dirR = {x:0, y:0}
 	let dirL = {x:0, y:0}
 	let dirU = {x:0, y:0}
 	let dirD = {x:0, y:0}
-	let speed = 3;	
 	let lineWidth = 0.5;
 			
 	// Draw right paddle
-	let right = new classes.RectSprite(cX, cY, width, height, dirR, speed, "white", lineWidth, "black");
+	let right = new classes.RectSprite(cX, cY, width, height, dirR, paddleSpeed, "white", lineWidth, "black");
 	paddles.push(right);
 	
 	
@@ -417,7 +432,7 @@ function createPaddles() {
 	cX = 0.5 * width;
 	cY = 0;
 	
-	let left = new classes.RectSprite(cX, cY, width, height, dirL, speed, "white", lineWidth, "black");
+	let left = new classes.RectSprite(cX, cY, width, height, dirL, paddleSpeed, "white", lineWidth, "black");
 	paddles.push(left);
 	
 	
@@ -429,7 +444,7 @@ function createPaddles() {
 	cX = 0;
 	cY = 0.5 * height;
 	
-	let up = new classes.RectSprite(cX, cY, width, height, dirU, speed*2.5, "white", lineWidth, "black");
+	let up = new classes.RectSprite(cX, cY, width, height, dirU, paddleSpeed*2.5, "white", lineWidth, "black");
 	paddles.push(up);
 	
 	
@@ -437,7 +452,7 @@ function createPaddles() {
 	cX = canvasWidth - width;
 	cY = canvasHeight - 1.5 * height;
 	
-	let down = new classes.RectSprite(cX, cY, width, height, dirD, speed*2.5, "white", lineWidth, "black");
+	let down = new classes.RectSprite(cX, cY, width, height, dirD, paddleSpeed*2.5, "white", lineWidth, "black");
 	paddles.push(down);
 	
 }

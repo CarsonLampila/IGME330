@@ -24,6 +24,15 @@ const drawParams = {
 	showEmboss 		: false
 };
 
+// Controls
+const ctrlParams = {
+	ballSize		: 30,
+	ballSpeed		: 2,
+	paddleSize		: 135,
+	paddleSpeed		: 3
+};
+
+
 // Startup
 function init(){
 	// Set inital song
@@ -32,7 +41,7 @@ function init(){
 	// Setups
 	let canvasElement = document.querySelector("canvas");
 	setupUI(canvasElement);
-	canvas.setupCanvas(canvasElement,audio.analyserNode);
+	canvas.setupCanvas(canvasElement,audio,playButton);
 	
 	// Create curvesCB
 	canvas.createCurves();
@@ -93,6 +102,72 @@ function setupUI(canvasElement){
   
   // Label = Value of slider
   volumeSlider.dispatchEvent(new Event("input"));
+  
+  
+  // Ball Size Controls
+  let ballSizeSlider = document.querySelector("#ballSizeSlider");
+  let ballSizeLabel = document.querySelector("#ballSizeLabel");
+  
+  // Ball Size Control Changes
+  ballSizeSlider.oninput = e => {
+	  // Size Change
+	  ctrlParams.ballSize = e.target.value;
+	  // Text Change
+	  ballSizeLabel.innerHTML = Math.round(e.target.value);
+  };
+  
+  // Label = Value of slider
+  ballSizeSlider.dispatchEvent(new Event("input"));
+  
+  
+  // Ball Speed Controls
+  let ballSpeedSlider = document.querySelector("#ballSpeedSlider");
+  let ballSpeedLabel = document.querySelector("#ballSpeedLabel");
+  
+  // Ball Speed Control Changes
+  ballSpeedSlider.oninput = e => {
+	  // Speed Change
+	  ctrlParams.ballSpeed = e.target.value;
+	  // Text Change
+	  ballSpeedLabel.innerHTML = Math.round(e.target.value);
+  };
+  
+  // Label = Value of slider
+  ballSpeedSlider.dispatchEvent(new Event("input"));
+  
+  
+  // Paddle Size Controls
+  let paddleSizeSlider = document.querySelector("#paddleSizeSlider");
+  let paddleSizeLabel = document.querySelector("#paddleSizeLabel");
+  
+  // Paddle Size Control Changes
+  paddleSizeSlider.oninput = e => {
+	  // Size Change
+	  ctrlParams.paddleSize = e.target.value;
+	  // Text Change
+	  paddleSizeLabel.innerHTML = Math.round(e.target.value);
+  };
+  
+  // Label = Value of slider
+  paddleSizeSlider.dispatchEvent(new Event("input"));
+  
+  
+  // Paddle Speed Controls
+  let paddleSpeedSlider = document.querySelector("#paddleSpeedSlider");
+  let paddleSpeedLabel = document.querySelector("#paddleSpeedLabel");
+  
+  // Paddle Speed Control Changes
+  paddleSpeedSlider.oninput = e => {
+	  // Size Change
+	  ctrlParams.paddleSpeed = e.target.value;
+	  // Text Change
+	  paddleSpeedLabel.innerHTML = Math.round(e.target.value);
+  };
+  
+  // Label = Value of slider
+  paddleSpeedSlider.dispatchEvent(new Event("input"));
+  
+  
   
   // Track Select
   let trackSelect = document.querySelector("#trackSelect");
@@ -168,7 +243,7 @@ function loop(){
 
 	requestAnimationFrame(loop);
 	
-	canvas.draw(drawParams);	
+	canvas.draw(drawParams, ctrlParams);	
 }
 
 export {init};
