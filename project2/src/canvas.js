@@ -20,7 +20,7 @@ let tempPos = 0;
 let dirChange = false;
 
 // Rotation
-let centerAngle = 0, currentAngle = 0;
+let centerAngle = 0;
 
 // Controls
 let lU = false, lD = false, rU = false, rD = false;
@@ -88,6 +88,7 @@ function draw(params={}, ctrls={}){
 			bars = []
 			createBall();
 			
+			// Pause
 			audio.pauseCurrentSound();
 			params.paused = true;
 		}
@@ -97,6 +98,7 @@ function draw(params={}, ctrls={}){
 	// Ball Enable
 	if (params.showBall){
 
+		// Change Ball Speed
 		ball.translateSpeed = ctrls.ballSpeed;
 		
 		// Freq or Wave
@@ -179,11 +181,7 @@ function draw(params={}, ctrls={}){
 		}		
 	}
 	
-		
-		
-		
-		
-				
+					
 	// Bitmap Manipulation
 	// Defenitions
 	let imageData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
@@ -287,12 +285,13 @@ function draw(params={}, ctrls={}){
 	ctx.putImageData(imageData, 0, 0);
 }
 
+
 // Create inital ball
 function createBall() {
 	// Bar Stats
 	let cX, cY, fX, fY, color;
-	let barWidth = (200 / audioDataFreq.length);
-	let colorChange = 700/audioDataFreq.length;
+	let barWidth = 200 / audioDataFreq.length;
+	let colorChange = 700 / audioDataFreq.length;
 	
 	let ballSize = 30;
 	let ballSpeed = 1.5;
@@ -300,7 +299,7 @@ function createBall() {
 		
 	// Reset start angle and color
 	let currentColor = 0;
-	currentAngle = 0;
+	let currentAngle = 0;
 
 	// Make sure direction is not up and down
 	let tempDir = utils.getRandomUnitVector();
@@ -333,6 +332,87 @@ function createBall() {
 		currentColor += colorChange;
 	}
 }
+
+
+// Create side paddles
+function createPaddles() {
+
+	// Paddle Stats
+	let width = canvasWidth * .02;
+	let height = 135;
+	let cX = canvasWidth - 1.5 * width;
+	let	cY = canvasHeight - height;
+	let dirR = {x:0, y:0}
+	let dirL = {x:0, y:0}
+	let dirU = {x:0, y:0}
+	let dirD = {x:0, y:0}
+	let speed = 3;
+	let lineWidth = 0.5;
+			
+	// Draw right paddle
+	let right = new classes.RectSprite(cX, cY, width, height, dirR, speed, "white", lineWidth, "black");
+	paddles.push(right);
+	
+	
+	// Draw left paddle
+	cX = 0.5 * width;
+	cY = 0;
+	
+	let left = new classes.RectSprite(cX, cY, width, height, dirL, speed, "white", lineWidth, "black");
+	paddles.push(left);
+	
+	
+	// Draw top paddle
+	let temp = width
+	width = height;
+	height = temp;
+	
+	cX = 0;
+	cY = 0.5 * height;
+	
+	let up = new classes.RectSprite(cX, cY, width, height, dirU, speed*2.5, "white", lineWidth, "black");
+	paddles.push(up);
+	
+	
+	// Draw bottom paddle
+	cX = canvasWidth - width;
+	cY = canvasHeight - 1.5 * height;
+	
+	let down = new classes.RectSprite(cX, cY, width, height, dirD, speed*2.5, "white", lineWidth, "black");
+	paddles.push(down);
+	
+}
+
+
+// Create initial quadratic curves
+function createCurves(){
+	
+	// Curve variables
+	let speed = 15;
+	let color = "black";
+	let lineWidth = 1;
+	let vectorTL = {x:.1, y:.1};
+	let vectorTR = {x:-.1, y:.1};
+	let vectorBL = {x:.1, y:-.1};
+	let vectorBR = {x:-.1, y:-.1};
+
+	// Top Left Curve
+	let tlCurve = new classes.CurveSprite(0, canvasHeight/2, vectorTL, speed, color, lineWidth, canvasWidth/2, 0, canvasWidth*.05, canvasHeight*.05);
+	curves.push(tlCurve);
+	
+	// Top Right Curve
+	let trCurve = new classes.CurveSprite(canvasWidth, canvasHeight/2, vectorTR, speed, color, lineWidth, canvasWidth/2, 0, canvasWidth*.95, canvasHeight*.05);
+	curves.push(trCurve);
+	
+	// Bottom Left Curve
+	let blCurve = new classes.CurveSprite(0, canvasHeight/2, vectorBL, speed, color, lineWidth, canvasWidth/2, canvasHeight, canvasWidth*.05, canvasHeight*.95);
+	curves.push(blCurve);
+	
+	// Bottom Right Curve
+	let brCurve = new classes.CurveSprite(canvasWidth, canvasHeight/2, vectorBR, speed, color, lineWidth, canvasWidth/2, canvasHeight, canvasWidth*.95, canvasHeight*.95);
+	curves.push(brCurve);
+}
+
 
 // Move the Ball and Bounce
 function moveBall(paddlesNum){
@@ -442,8 +522,7 @@ function moveBall(paddlesNum){
 					ball.reflectX();
 				} else {
 					bars[i].reflectX();
-				}
-				
+				}		
 				ball.move();
 			}	
 		}
@@ -511,116 +590,13 @@ function moveBall(paddlesNum){
 					ball.reflectY();
 				} else {
 					bars[i].reflectY();
-				}
-				
+				}			
 				ball.move();
 			}
 		}
 	}
 }
 
-// Update bars for music
-function musicBars(audio){
-	
-	let rotation = .0001;
-	
-	// Loop through ball objects except circle
-	for (let i = 0; i < bars.length; i++){
-		
-		// Update Close Bar
-		bars[i].cX = Math.cos(currentAngle) * ball.size + ball.cX;	
-		bars[i].cY = Math.sin(currentAngle) * ball.size + ball.cY;
-		
-		// Update Far Bar
-		bars[i].fX = (Math.cos(currentAngle) * (audio[i]/5)) + bars[i].cX;
-		bars[i].fY = (Math.sin(currentAngle) * (audio[i]/5)) + bars[i].cY;
-		
-		// Rotate for each bar + rotation for spin
-		currentAngle += centerAngle + rotation;
-	}
-}
-
-
-// Create side paddles
-function createPaddles() {
-
-	// Paddle Stats
-	let width = canvasWidth * .02;
-	let height = 135;
-	let cX = canvasWidth - 1.5 * width;
-	let	cY = canvasHeight - height;
-	let dirR = {x:0, y:0}
-	let dirL = {x:0, y:0}
-	let dirU = {x:0, y:0}
-	let dirD = {x:0, y:0}
-	let speed = 3;
-	let lineWidth = 0.5;
-			
-	// Draw right paddle
-	let right = new classes.RectSprite(cX, cY, width, height, dirR, speed, "white", lineWidth, "black");
-	paddles.push(right);
-	
-	
-	// Draw left paddle
-	cX = 0.5 * width;
-	cY = 0;
-	
-	let left = new classes.RectSprite(cX, cY, width, height, dirL, speed, "white", lineWidth, "black");
-	paddles.push(left);
-	
-	
-	// Draw top paddle
-	let temp = width
-	width = height;
-	height = temp;
-	
-	cX = 0;
-	cY = 0.5 * height;
-	
-	let up = new classes.RectSprite(cX, cY, width, height, dirU, speed*2.5, "white", lineWidth, "black");
-	paddles.push(up);
-	
-	
-	// Draw bottom paddle
-	cX = canvasWidth - width;
-	cY = canvasHeight - 1.5 * height;
-	
-	let down = new classes.RectSprite(cX, cY, width, height, dirD, speed*2.5, "white", lineWidth, "black");
-	paddles.push(down);
-	
-}
-
-// Key is pressed
-function press(e){
-	// W
-	if (e.keyCode === 87)
-		lU = true;
-	// S
-	if (e.keyCode === 83)
-		lD = true;
-	// Up Arrow
-	if (e.keyCode === 38)
-		rU = true;
-	// Down Arrow
-	if (e.keyCode === 40)
-		rD = true;
-}
-
-// Key is released
-function depress(e){
-	// W
-	if (e.keyCode === 87)
-		lU = false;
-	// S
-	if (e.keyCode === 83)
-		lD = false;
-	// Up Arrow
-	if (e.keyCode === 38)
-		rU = false;
-	// Down Arrow
-	if (e.keyCode === 40)
-		rD = false;
-}
 
 // Move the paddles
 function movePaddles(){
@@ -666,34 +642,30 @@ function movePaddles(){
 	}
 }
 
-// Create initial quadratic curves
-function createCurves(){
-	
-	// Curve variables
-	let speed = 15;
-	let color = "black";
-	let lineWidth = 1;
-	let vectorTL = {x:.1, y:.1};
-	let vectorTR = {x:-.1, y:.1};
-	let vectorBL = {x:.1, y:-.1};
-	let vectorBR = {x:-.1, y:-.1};
 
-	// Top Left Curve
-	let tlCurve = new classes.CurveSprite(0, canvasHeight/2, vectorTL, speed, color, lineWidth, canvasWidth/2, 0, canvasWidth*.05, canvasHeight*.05);
-	curves.push(tlCurve);
+// Update bars for music
+function musicBars(audio){
 	
-	// Top Right Curve
-	let trCurve = new classes.CurveSprite(canvasWidth, canvasHeight/2, vectorTR, speed, color, lineWidth, canvasWidth/2, 0, canvasWidth*.95, canvasHeight*.05);
-	curves.push(trCurve);
+	// Angle defenitions
+	let currentAngle = 0;
+	let rotation = .0001;
 	
-	// Bottom Left Curve
-	let blCurve = new classes.CurveSprite(0, canvasHeight/2, vectorBL, speed, color, lineWidth, canvasWidth/2, canvasHeight, canvasWidth*.05, canvasHeight*.95);
-	curves.push(blCurve);
-	
-	// Bottom Right Curve
-	let brCurve = new classes.CurveSprite(canvasWidth, canvasHeight/2, vectorBR, speed, color, lineWidth, canvasWidth/2, canvasHeight, canvasWidth*.95, canvasHeight*.95);
-	curves.push(brCurve);
+	// Loop through ball objects except circle
+	for (let i = 0; i < bars.length; i++){
+		
+		// Update Close Bar
+		bars[i].cX = Math.cos(currentAngle) * ball.size + ball.cX;	
+		bars[i].cY = Math.sin(currentAngle) * ball.size + ball.cY;
+		
+		// Update Far Bar
+		bars[i].fX = (Math.cos(currentAngle) * (audio[i]/5)) + bars[i].cX;
+		bars[i].fY = (Math.sin(currentAngle) * (audio[i]/5)) + bars[i].cY;
+		
+		// Rotate for each bar + rotation for spin
+		currentAngle += centerAngle + rotation;
+	}
 }
+
 
 // Update curves for music
 function musicCurves(){
@@ -750,6 +722,40 @@ function musicCurves(){
 		// Update previous music position
 		tempPos = circlePos;			
 	}
+}
+
+
+// Key is pressed
+function press(e){
+	// W
+	if (e.keyCode === 87)
+		lU = true;
+	// S
+	if (e.keyCode === 83)
+		lD = true;
+	// Up Arrow
+	if (e.keyCode === 38)
+		rU = true;
+	// Down Arrow
+	if (e.keyCode === 40)
+		rD = true;
+}
+
+
+// Key is released
+function depress(e){
+	// W
+	if (e.keyCode === 87)
+		lU = false;
+	// S
+	if (e.keyCode === 83)
+		lD = false;
+	// Up Arrow
+	if (e.keyCode === 38)
+		rU = false;
+	// Down Arrow
+	if (e.keyCode === 40)
+		rD = false;
 }
 
 
