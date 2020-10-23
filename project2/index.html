@@ -11,7 +11,9 @@
 	<canvas width="800" height="400"></canvas>
 	<div id="controls">
 		<section>
-			<button id="playButton" data-playing="no"></button>
+			<audio controls src="media/Beetle Juice Theme Song.mp3"></audio>
+		</section>
+		<section>
 			<button id="fsButton">Full Screen</button>
 		
 			<label>Track: 
@@ -23,11 +25,11 @@
 			</label>
 		</section>
 		
+
+		
 		<section>
 			Volume: <input type="range" id="volumeSlider" min="0" max="2" value="1" step="0.01">
 			<span id="volumeLabel">???</span>
-			Ball Size: <input type="range" id="ballSizeSlider" min="15" max="60" value="30" step="1">
-			<span id="ballSizeLabel">???</span>
 			Ball Speed: <input type="range" id="ballSpeedSlider" min="1" max="5" value="2" step="0.1">
 			<span id="ballSpeedLabel">???</span>
 			Paddle Size: <input type="range" id="paddleSizeSlider" min="50" max="220" value="135" step="5">
@@ -40,6 +42,13 @@
 	</div>
 </main>
 <section>
+	<label>Paddles:&ensp;</label>
+	<label for="paddlesNone">No Paddles</label><input type="radio" id="paddlesNone" class="radial" name="paddles">
+	<label for="paddlesHor">Horizontal Paddles</label><input type="radio" id="paddlesHor" class="radial" name="paddles">
+	<label for="paddlesVer">Vertical Paddles</label><input type="radio" id="paddlesVer" class="radial" name="paddles">
+	<label for="paddlesAll">All Paddles</label><input type="radio" id="paddlesAll" class="radial" name="paddles">
+</section>
+<section>
   <span><input type="checkbox" id="gradientCB"><label for="gradientCB">Show Gradient</label></span>
   <span><input type="checkbox" id="freqWaveCirCB"><label for="freqWaveCirCB">Freq/Wave Circle</label></span>
   <span><input type="checkbox" id="freqWaveBarCB"><label for="freqWaveBarCB">Freq/Wave Bars</label></span>
@@ -47,9 +56,28 @@
   <span><input type="checkbox" id="barsCB"><label for="barsCB">Show Bar</label></span>
   <span><input type="checkbox" id="paddlesCB"><label for="paddlesCB">Show Paddles</label></span>
   <span><input type="checkbox" id="curvesCB"><label for="curvesCB">Show Curves</label></span>
+</section>
+<section>
   <span><input type="checkbox" id="noiseCB"><label for="noiseCB">Show Noise</label></span>
   <span><input type="checkbox" id="invertCB"><label for="invertCB">Show Invert</label></span>
+  <span><input type="checkbox" id="greyscaleCB"><label for="grayscaleCB">Show Greyscale</label></span>
+  <span><input type="checkbox" id="tintCB"><label for="tintCB">Show Tint</label></span>
   <span><input type="checkbox" id="embossCB"><label for="embossCB">Show Emboss</label></span>
+</section>
+<section>
+  <label for="tints">Choose a tint:</label>
+  <select name="tints" id="tints">
+    <option value="red">Red</option>
+    <option value="orange">Orange</option>
+    <option value="yellow">Yellow</option>
+    <option value="green">Green</option>
+    <option value="blue">Blue</option>
+    <option value="purple">Purple</option>
+  </select>
+</section>
+<section>
+	Quality: <input type="range" id="qualitySlider" min="0" max="100" value="0" step="1">
+	<span id="qualityLabel">???</span>
 </section>
 </body>
 </html>

@@ -75,14 +75,14 @@ class CircleSprite extends Sprite{
 	
 			// Middle
 			ctx.beginPath();
-			ctx.fillStyle = utils.makeColor(this.color + 75);
+			ctx.fillStyle = utils.makeColor(this.color + 200);
 			ctx.arc(this.cX, this.cY, circleRadius, 0, 2 * Math.PI, false);
 			ctx.fill();
 			ctx.closePath();
 	
 			// Outer
 			ctx.beginPath();
-			ctx.fillStyle = utils.makeColor(this.color + 150);
+			ctx.fillStyle = utils.makeColor(this.color + 400);
 			ctx.arc(this.cX, this.cY, circleRadius * 1.5, 0, 2 * Math.PI, false);
 			ctx.fill();
 			ctx.closePath();
@@ -92,12 +92,12 @@ class CircleSprite extends Sprite{
 	// X Bounce
 	reflectX(){
 		this.fwd.x *= -1;
-		this.color += 50;
+		this.color += 100;
 	}
 	// Y Bounce
 	reflectY(){
 		this.fwd.y *= -1;
-		this.color += 50;
+		this.color += 100;
 	}
 }
 

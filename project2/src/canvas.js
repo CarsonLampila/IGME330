@@ -25,16 +25,10 @@ let centerAngle = 0, currentAngle = 0;
 // Controls
 let lU = false, lD = false, rU = false, rD = false;
 
-let ballSize = 30;
-let ballSpeed = 1.5;
-let paddleSize = 135;
-let paddleSpeed = 3;
-
-
 
 
 // Setup Canvas
-function setupCanvas(canvasElement,analyserNodeRef, playButton){
+function setupCanvas(canvasElement,analyserNodeRef){
 	// Setup Context
 	ctx = canvasElement.getContext("2d");
 	canvasWidth = canvasElement.width;
@@ -52,8 +46,6 @@ function setupCanvas(canvasElement,analyserNodeRef, playButton){
 	
 	// Establish Angle
 	centerAngle = ((2 * Math.PI) / audioDataFreq.length)
-	
-	pButton = playButton;
 }
 
 
@@ -83,9 +75,9 @@ function draw(params={}, ctrls={}){
 	}
 	
 	if (params.paused == false){
-		
+	
 		// Bounce Ball
-		moveBall();	
+		moveBall(ctrls.paddleCount);	
 	
 		// Reset Pos when out of X and Y bounds
 		if (ball.cX + (ball.size * 3) < 0 ||
@@ -97,7 +89,6 @@ function draw(params={}, ctrls={}){
 			createBall();
 			
 			audio.pauseCurrentSound();
-			pButton.dataset.playing = "no";
 			params.paused = true;
 		}
 	}
@@ -105,9 +96,8 @@ function draw(params={}, ctrls={}){
 	
 	// Ball Enable
 	if (params.showBall){
-		
-		ball.size = ballSize;
-		ball.speed = ctrls.ballSpeed;
+
+		ball.translateSpeed = ctrls.ballSpeed;
 		
 		// Freq or Wave
 		if (params.freqWaveCir)	
@@ -148,7 +138,6 @@ function draw(params={}, ctrls={}){
 	// Paddle Enable
 	if (params.showPaddle){
 
-
 		// Move paddles
 		document.addEventListener('keydown', press);
 		document.addEventListener('keyup', depress);
@@ -156,24 +145,45 @@ function draw(params={}, ctrls={}){
 		
 		// Loop through paddle objects and draw
 		for (let i = 0; i < paddles.length; i++){
+			// Left/Right Size and Speed
 			if (i == 0 || i == 1){
 				paddles[i].height = ctrls.paddleSize;
-				paddles[i].speed = ctrls.paddleSpeed;
+				paddles[i].translateSpeed = ctrls.paddleSpeed;
 			}
+			// Top/Bottom Size and Speed
 			else{
 				paddles[i].width = ctrls.paddleSize;
-				paddles[i].speed = ctrls.paddleSpeed * 2.5;
+				paddles[i].translateSpeed = ctrls.paddleSpeed * 2.5;
 			}
 			
-			paddles[i].draw(ctx);	
+			// Draw
+			switch(ctrls.paddleCount) {
+				// No Paddles
+				case 0:
+					break;
+				// Horizontal Paddles
+				case 1:
+					if (i == 0 || i == 1)
+						paddles[i].draw(ctx);
+					break;
+				// Vertical Paddles
+				case 2:
+					if (i == 2 || i == 3)
+						paddles[i].draw(ctx);
+					break;
+				// All Paddles
+				case 3:
+					paddles[i].draw(ctx);
+					break;
+			}		
 		}		
 	}
 	
-
-	
 		
-			
-	
+		
+		
+		
+				
 	// Bitmap Manipulation
 	// Defenitions
 	let imageData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
@@ -200,19 +210,78 @@ function draw(params={}, ctrls={}){
 			data[i+1] = 255 - green;
 			data[i+2] = 255 - blue;
 		}
+		
+		// Grayscale Enable
+		if(params.showGreyscale){
+			let average = (data[i] + data[i + 1] + data[i + 2]) / 3;
+
+			data[i] = average;
+			data[i + 1] = average;
+			data[i + 2] = average;
+		}
+		// Tint Enable
+		if(params.showTint){
+			
+			let red = 0;
+			let green = 0;
+			let blue = 0;
+			
+			// Color Select
+			switch(params.tintColor){
+				
+				case "red":
+					red = 75;
+					green = 0;
+					blue = 0;
+					break;
+					
+				case "orange":
+					red = 75;
+					green = 50;
+					blue = 0;
+					break;
+					
+				case "yellow":
+					red = 75;
+					green = 75;
+					blue = 0;
+					break;
+					
+				case "green":
+					red = 0;
+					green = 75;
+					blue = 0;
+					break;
+					
+				case "blue":
+					red = 0;
+					green = 0;
+					blue = 75;
+					break;
+					
+				case "purple":
+					red = 50;
+					green = 0;
+					blue = 50;
+					break;
+				
+			}
+			
+			// Apply
+			data[i] += red;
+			data[i + 1] += green;
+			data[i + 2] += blue;
+		}
 	}
 	
 	// Emboss Enable
 	if(params.showEmboss){
 		// Loop through every pixel + RGBA
-		for (let i = 0; i < length; i++) {
-			// Skip Alpha
-			if (i%4 == 3) 
-				continue;
-			// Effect
-			data[i] = 127 + 2*data[i] - data[i+4] - data[i+width*4];
-		}
-	}	
+        for (let i = 0; i < length; i++) {
+            if (i % 4 == 3) continue; // skip alpha channel
+            data[i] = 127 + 2 * data[i] - data[i + 4] - data[i + width * 4];
+        }
+	}
 	
 	// Reinput changed fata to Canvas
 	ctx.putImageData(imageData, 0, 0);
@@ -224,6 +293,9 @@ function createBall() {
 	let cX, cY, fX, fY, color;
 	let barWidth = (200 / audioDataFreq.length);
 	let colorChange = 700/audioDataFreq.length;
+	
+	let ballSize = 30;
+	let ballSpeed = 1.5;
 	
 		
 	// Reset start angle and color
@@ -263,8 +335,33 @@ function createBall() {
 }
 
 // Move the Ball and Bounce
-function moveBall(){
-
+function moveBall(paddlesNum){
+	
+	let paddleX, paddleY;
+	
+	switch(paddlesNum){
+		// X: Wall Bounce, Y: Wall Bounce
+		case 0:
+			paddleX = false;
+			paddleY = false;
+			break;
+		// X: Paddle Bounce, Y: Wall Bounce
+		case 1:
+			paddleX = true;
+			paddleY = false;
+			break;
+		// X: Wall Bounce, Y: Paddle Bounce
+		case 2:
+			paddleX = false;
+			paddleY = true;
+			break;
+		// X: Paddle Bounce, Y: Paddle Bounce
+		case 3:
+			paddleX = true;
+			paddleY = true;
+			break;
+	}
+	
 	// Loop through all ball objects
 	for (let i = -1; i < bars.length; i++){
 		
@@ -275,113 +372,148 @@ function moveBall(){
 			bars[i].move();
 		}
 		
-		// X Bounce
 		// Center of paddles
 		let paddleLC = paddles[1].cY + (paddles[1].height / 2);
 		let paddleRC = paddles[0].cY + (paddles[0].height / 2);
-		
-		// Left side of screen
-		if (ball.cX < canvasWidth/2){
-			
-			// Ball is not past paddle
-			if (ball.cX - (ball.size*1.5) > 0){
-				
-				// Check if ball is within range of paddle Y
-				if (ball.cY > paddleLC - (paddles[1].height / 2) - (ball.size / 2) && 		// Top
-					ball.cY < paddleLC + (paddles[1].height / 2) + (ball.size / 2)){		// Bottom
-					
-					// Check if ball is within range of paddle X
-					if (ball.cX <= (ball.size) + (0.5 * paddles[1].width) + paddles[1].width){	// Left
-						
-						// Bounce
-						if (i == -1){
-							ball.reflectX();
-						} else {
-							bars[i].reflectX();
-						}
-						ball.move();
-					}	
-				}
-			}
-		}
-		// Right side of screen
-		else{
-			
-			// Ball is not past paddle
-			if (ball.cX + (ball.size*1.5) < canvasWidth){
-				
-				// Check if ball is within range of paddle Y	
-				if (ball.cY > paddleRC - (paddles[0].height / 2) - (ball.size / 2) && 		// Top
-					ball.cY < paddleRC + (paddles[0].height / 2) + (ball.size / 2)){		// Bottom
-					
-					// Check if ball is within range of paddle X
-					if (ball.cX >= canvasWidth - (ball.size) - (0.5 * paddles[0].width) - paddles[0].width){	// Right
-					
-						// Bounce
-						if (i == -1){
-							ball.reflectX();
-						} else {
-							bars[i].reflectX();
-						}
-						ball.move();
-					}	
-				}	
-			}
-		}
-		
-		
-		
-		// Y Bounce
-		// Center of paddles
 		let paddleTC = paddles[2].cX + (paddles[2].width / 2);
 		let paddleBC = paddles[3].cX + (paddles[3].width / 2);
+
 		
-		// Top side of screen
-		if (ball.cY < canvasHeight/2){
+		
+		// Paddle Bounce X
+		if (paddleX){
+			// X Bounce
+			// Left side of screen
+			if (ball.cX < canvasWidth/2){
 			
-			// Ball is not past paddle
-			if (ball.cY - (ball.size*1.5) > 0){
-				
-				// Check if ball is within range of paddle X
-				if (ball.cX > paddleTC - (paddles[2].width / 2) - (ball.size / 2) && 				// Left
-					ball.cX < paddleTC + (paddles[2].width / 2) + (ball.size / 2)){					// Right
+				// Ball is not past paddle
+				if (ball.cX - (ball.size*1.5) > 0){
 					
-					// Check if ball is within range of paddle X
-					if (ball.cY <= (ball.size) + (0.5 * paddles[2].height) + paddles[2].height){	// Top
+					// Check if ball is within range of paddle Y
+					if (ball.cY > paddleLC - (paddles[1].height / 2) - (ball.size / 2) && 		// Top
+						ball.cY < paddleLC + (paddles[1].height / 2) + (ball.size / 2)){		// Bottom
+					
+						// Check if ball is within range of paddle X
+						if (ball.cX <= (ball.size) + (0.5 * paddles[1].width) + paddles[1].width){	// Left
 						
-						// Bounce
-						if (i == -1){
-							ball.reflectY();
-						} else {
-							bars[i].reflectY();
-						}
-						ball.move();
+							// Bounce
+							if (i == -1){
+								ball.reflectX();
+							} else {
+								bars[i].reflectX();
+							}
+							ball.move();
+						}	
+					}
+				}
+			}
+			// Right side of screen
+			else{
+			
+				// Ball is not past paddle
+				if (ball.cX + (ball.size*1.5) < canvasWidth){
+				
+					// Check if ball is within range of paddle Y	
+					if (ball.cY > paddleRC - (paddles[0].height / 2) - (ball.size / 2) && 		// Top
+						ball.cY < paddleRC + (paddles[0].height / 2) + (ball.size / 2)){		// Bottom
+					
+						// Check if ball is within range of paddle X
+						if (ball.cX >= canvasWidth - (ball.size) - (0.5 * paddles[0].width) - paddles[0].width){	// Right
+					
+							// Bounce
+							if (i == -1){
+								ball.reflectX();
+							} else {
+								bars[i].reflectX();
+							}
+							ball.move();
+						}	
 					}	
 				}
 			}
 		}
-		// Bottom side of screen
+		// Wall Bounce X
 		else{
-			
-			// Ball is not past paddle
-			if (ball.cY + (ball.size*1.5) < canvasWidth){
+			// Check if ball is within range of paddle X
+			if (ball.cX <= ball.size || ball.cX >= canvasWidth - ball.size){	// Left
+						
+				// Bounce
+				if (i == -1){
+					ball.reflectX();
+				} else {
+					bars[i].reflectX();
+				}
 				
-				// Check if ball is within range of paddle Y	
-				if (ball.cX > paddleBC - (paddles[3].width / 2) - (ball.size / 2) && 							// Left
-					ball.cX < paddleBC + (paddles[3].width / 2) + (ball.size / 2)){								// Right
-					
+				ball.move();
+			}	
+		}
+	
+	
+		// Paddle Bounce Y
+		if (paddleY){
+			// Y Bounce
+			// Top side of screen
+			if (ball.cY < canvasHeight/2){
+			
+				// Ball is not past paddle
+				if (ball.cY - (ball.size*1.5) > 0){
+				
 					// Check if ball is within range of paddle X
-					if (ball.cY >= canvasHeight - (ball.size) - (0.5 * paddles[3].height) - paddles[3].height){	// Bottom
+					if (ball.cX > paddleTC - (paddles[2].width / 2) - (ball.size / 2) && 				// Left
+						ball.cX < paddleTC + (paddles[2].width / 2) + (ball.size / 2)){					// Right
 					
-						// Bounce
-						if (i == -1){
-							ball.reflectY();
-						} else {
-							bars[i].reflectY();
-						}
-						ball.move();
+						// Check if ball is within range of paddle X
+						if (ball.cY <= (ball.size) + (0.5 * paddles[2].height) + paddles[2].height){	// Top
+				
+							// Bounce
+							if (i == -1){
+								ball.reflectY();
+							} else {
+								bars[i].reflectY();
+							}
+							ball.move();
+						}	
+					}
+				}
+			}
+			// Bottom side of screen
+			else{
+			
+				// Ball is not past paddle
+				if (ball.cY + (ball.size*1.5) < canvasWidth){
+				
+					// Check if ball is within range of paddle Y	
+					if (ball.cX > paddleBC - (paddles[3].width / 2) - (ball.size / 2) && 							// Left
+						ball.cX < paddleBC + (paddles[3].width / 2) + (ball.size / 2)){								// Right
+					
+						// Check if ball is within range of paddle X
+						if (ball.cY >= canvasHeight - (ball.size) - (0.5 * paddles[3].height) - paddles[3].height){	// Bottom
+					
+							// Bounce
+							if (i == -1){
+								ball.reflectY();
+							} else {
+								bars[i].reflectY();
+							}
+							ball.move();
+						}	
 					}	
-				}	
+				}
+			}
+		}
+		// Wall Bounce Y
+		else{
+			// Check if ball is within range of paddle Y
+			if (ball.cY <= ball.size || ball.cY >= canvasHeight - ball.size){	// Top
+						
+				// Bounce
+				if (i == -1){
+					ball.reflectY();
+				} else {
+					bars[i].reflectY();
+				}
+				
+				ball.move();
 			}
 		}
 	}
@@ -414,17 +546,18 @@ function createPaddles() {
 
 	// Paddle Stats
 	let width = canvasWidth * .02;
-	let height = paddleSize;
+	let height = 135;
 	let cX = canvasWidth - 1.5 * width;
 	let	cY = canvasHeight - height;
 	let dirR = {x:0, y:0}
 	let dirL = {x:0, y:0}
 	let dirU = {x:0, y:0}
 	let dirD = {x:0, y:0}
+	let speed = 3;
 	let lineWidth = 0.5;
 			
 	// Draw right paddle
-	let right = new classes.RectSprite(cX, cY, width, height, dirR, paddleSpeed, "white", lineWidth, "black");
+	let right = new classes.RectSprite(cX, cY, width, height, dirR, speed, "white", lineWidth, "black");
 	paddles.push(right);
 	
 	
@@ -432,7 +565,7 @@ function createPaddles() {
 	cX = 0.5 * width;
 	cY = 0;
 	
-	let left = new classes.RectSprite(cX, cY, width, height, dirL, paddleSpeed, "white", lineWidth, "black");
+	let left = new classes.RectSprite(cX, cY, width, height, dirL, speed, "white", lineWidth, "black");
 	paddles.push(left);
 	
 	
@@ -444,7 +577,7 @@ function createPaddles() {
 	cX = 0;
 	cY = 0.5 * height;
 	
-	let up = new classes.RectSprite(cX, cY, width, height, dirU, paddleSpeed*2.5, "white", lineWidth, "black");
+	let up = new classes.RectSprite(cX, cY, width, height, dirU, speed*2.5, "white", lineWidth, "black");
 	paddles.push(up);
 	
 	
@@ -452,7 +585,7 @@ function createPaddles() {
 	cX = canvasWidth - width;
 	cY = canvasHeight - 1.5 * height;
 	
-	let down = new classes.RectSprite(cX, cY, width, height, dirD, paddleSpeed*2.5, "white", lineWidth, "black");
+	let down = new classes.RectSprite(cX, cY, width, height, dirD, speed*2.5, "white", lineWidth, "black");
 	paddles.push(down);
 	
 }

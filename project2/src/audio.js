@@ -3,12 +3,13 @@ let audioCtx;
 
 // **These are "private" properties - these will NOT be visible outside of this module (i.e. file)**
 // 2 - WebAudio nodes that are part of our WebAudio audio routing graph
-let element, sourceNode, analyserNode, gainNode;
+let element, sourceNode, analyserNode, gainNode, qualityFilter;
 
 // 3 - here we are faking an enumeration
 const DEFAULTS = Object.freeze({
 	gain		:		.5,
-	numSamples	:		256
+	numSamples	:		256,
+	quality		:		0
 });
 
 // 4 - create a new array of 8-bit integers (0-255)
@@ -22,7 +23,8 @@ function setupWebaudio(filePath){
 	audioCtx = new AudioContext();
 
 // 2 - this creates an <audio> element
-	element = new Audio();	//document.querySelector("audio");
+	//element = new Audio();	//document.querySelector("audio");
+	element = document.querySelector("audio");
 
 // 3 - have it point at a sound file
 	loadSoundFile(filePath);
@@ -33,6 +35,7 @@ function setupWebaudio(filePath){
 // 5 - create an analyser node
 // note the UK spelling of "Analyser"
 	analyserNode = audioCtx.createAnalyser();	// note the UK spelling of Analyser
+	
 
 /*
 // 6
@@ -50,11 +53,20 @@ analyserNode.fftSize = DEFAULTS.numSamples;
 // 7 - create a gain (volume) node
 	gainNode = audioCtx.createGain();
 	gainNode.gain.value = DEFAULTS.gain;
+	
+	// Create detune biquad filter
+	qualityFilter = audioCtx.createBiquadFilter();
+	//detuneFilter.Q.value = DEFAULTS.detune;
+	//detuneFilter.type = "detune";
 
 // 8 - connect the nodes - we now have an audio graph
+	//sourceNode.connect(analyserNode);
+	//analyserNode.connect(gainNode);
+	//gainNode.connect(audioCtx.destination);
 	sourceNode.connect(analyserNode);
 	analyserNode.connect(gainNode);
-	gainNode.connect(audioCtx.destination);
+	gainNode.connect(qualityFilter);
+	qualityFilter.connect(audioCtx.destination)
 }
 
 function loadSoundFile(filePath){
@@ -74,4 +86,12 @@ function setVolume(value){
 	gainNode.gain.value = value;
 }
 
-export {audioCtx,setupWebaudio,playCurrentSound,pauseCurrentSound,loadSoundFile,setVolume,analyserNode};
+function setQuality(value){
+	qualityFilter.gain.value = gainNode.gain.value;
+	qualityFilter.Q.value = value;
+	//detuneFilter.Q.value = value;
+	//qualityFilter.gain.setValueAtTime(0, audioCtx.currentTime);
+}
+
+
+export {audioCtx,setupWebaudio,playCurrentSound,pauseCurrentSound,loadSoundFile,setVolume,setQuality,analyserNode};

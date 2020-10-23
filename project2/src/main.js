@@ -21,15 +21,18 @@ const drawParams = {
 	showCurves		: true,
 	showNoise		: false,
 	showInvert 		: false,
+	showGreyscale	: false,
+	showTint		: false,
+	tintColor		: "red",
 	showEmboss 		: false
 };
 
 // Controls
 const ctrlParams = {
-	ballSize		: 30,
 	ballSpeed		: 2,
 	paddleSize		: 135,
-	paddleSpeed		: 3
+	paddleSpeed		: 3,
+	paddleCount		: 1
 };
 
 
@@ -41,7 +44,7 @@ function init(){
 	// Setups
 	let canvasElement = document.querySelector("canvas");
 	setupUI(canvasElement);
-	canvas.setupCanvas(canvasElement,audio,playButton);
+	canvas.setupCanvas(canvasElement,audio);
 	
 	// Create curvesCB
 	canvas.createCurves();
@@ -65,28 +68,32 @@ function setupUI(canvasElement){
   fsButton.onclick = e => {
     utils.goFullscreen(canvasElement);
   };
+ 
+ 
+  // Play / Pause Controls
+  let audioControls = document.querySelector("audio");
+  // Play
+  audioControls.onplay = e => {
+	  audio.audioCtx.resume();
+	  drawParams.paused = false;
+  }
+  // Pause
+  audioControls.onpause = e => {
+	  drawParams.paused = true;
+  }
   
-  // Play Button
-  playButton.onclick = e => {
-	  
-	  // Check if paused
-	  if (audio.audioCtx.state == "suspended")
-		  audio.audioCtx.resume();
-
-
-	  // Flip Play and Pause Sound and Text
-	  // Play
-	  if (e.target.dataset.playing == "no") {
-		  audio.playCurrentSound();
-		  e.target.dataset.playing = "yes";
-		  drawParams.paused = false;
-	  // Pause
-	  }else{
-		  audio.pauseCurrentSound();
-		  e.target.dataset.playing = "no";
-		  drawParams.paused = true;
+  
+  // Track Select
+  let trackSelect = document.querySelector("#trackSelect");
+  // Track Change
+  trackSelect.onchange = e => {
+	  audio.loadSoundFile(e.target.value);
+	  // Pause current
+	  if (playButton.dataset.playing = "yes") {
+		  playButton.dispatchEvent(new MouseEvent("click"));
 	  }
   };
+  
   
   // Volume Controls
   let volumeSlider = document.querySelector("#volumeSlider");
@@ -103,23 +110,7 @@ function setupUI(canvasElement){
   // Label = Value of slider
   volumeSlider.dispatchEvent(new Event("input"));
   
-  
-  // Ball Size Controls
-  let ballSizeSlider = document.querySelector("#ballSizeSlider");
-  let ballSizeLabel = document.querySelector("#ballSizeLabel");
-  
-  // Ball Size Control Changes
-  ballSizeSlider.oninput = e => {
-	  // Size Change
-	  ctrlParams.ballSize = e.target.value;
-	  // Text Change
-	  ballSizeLabel.innerHTML = Math.round(e.target.value);
-  };
-  
-  // Label = Value of slider
-  ballSizeSlider.dispatchEvent(new Event("input"));
-  
-  
+ 
   // Ball Speed Controls
   let ballSpeedSlider = document.querySelector("#ballSpeedSlider");
   let ballSpeedLabel = document.querySelector("#ballSpeedLabel");
@@ -168,17 +159,13 @@ function setupUI(canvasElement){
   paddleSpeedSlider.dispatchEvent(new Event("input"));
   
   
+  // Shape Controls
+  document.querySelector("#paddlesHor").checked = true;
+  document.querySelector("#paddlesNone").onclick = function(e){ ctrlParams.paddleCount = 0; };
+  document.querySelector("#paddlesHor").onclick = function(e){ ctrlParams.paddleCount = 1; };
+  document.querySelector("#paddlesVer").onclick = function(e){ ctrlParams.paddleCount = 2; };
+  document.querySelector("#paddlesAll").onclick = function(e){ ctrlParams.paddleCount = 3; };
   
-  // Track Select
-  let trackSelect = document.querySelector("#trackSelect");
-  // Track Change
-  trackSelect.onchange = e => {
-	  audio.loadSoundFile(e.target.value);
-	  // Pause current
-	  if (playButton.dataset.playing = "yes") {
-		  playButton.dispatchEvent(new MouseEvent("click"));
-	  }
-  };
   
   // Gradient Checkbox
   document.querySelector("#gradientCB").checked = true;
@@ -231,10 +218,40 @@ function setupUI(canvasElement){
 		drawParams.showInvert = !drawParams.showInvert;
 	};
 	
+  // Greyscale Checkbox
+  document.querySelector("#greyscaleCB").oninput = function(e){ 
+		drawParams.showGreyscale = !drawParams.showGreyscale;
+	};
+	
+  // Tint Checkbox
+  document.querySelector("#tintCB").oninput = function(e){ 
+		drawParams.showTint = !drawParams.showTint;
+	};
+	
   // Emboss Checkbox
   document.querySelector("#embossCB").oninput = function(e){ 
 		drawParams.showEmboss = !drawParams.showEmboss;
 	};
+	
+  // Tint Change
+  document.querySelector("#tints").onchange = function(e){ 
+		drawParams.tintColor = e.target.value;
+	};
+	
+  // Quality Controls
+  let qualitySlider = document.querySelector("#qualitySlider");
+  let qualityLabel = document.querySelector("#qualityLabel");
+  
+  // Detune Control Changes
+  qualitySlider.oninput = e => {
+	  // Sound Change
+	  audio.setQuality(e.target.value);
+	  // Text Change
+	  qualityLabel.innerHTML = e.target.value;
+  };
+  
+  // Label = Value of slider
+ qualitySlider.dispatchEvent(new Event("input"));
 	
 }
 
@@ -245,5 +262,14 @@ function loop(){
 	
 	canvas.draw(drawParams, ctrlParams);	
 }
+
+
+
+
+
+
+
+
+
 
 export {init};
