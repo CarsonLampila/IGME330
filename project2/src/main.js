@@ -24,7 +24,8 @@ const drawParams = {
 	showGreyscale	: false,
 	showTint		: false,
 	tintColor		: "red",
-	showEmboss 		: false
+	showEmboss 		: false,
+	soundQuality	: false
 };
 
 // Controls
@@ -238,20 +239,33 @@ function setupUI(canvasElement){
 		drawParams.tintColor = e.target.value;
 	};
 	
+	
   // Quality Controls
   let qualitySlider = document.querySelector("#qualitySlider");
   let qualityLabel = document.querySelector("#qualityLabel");
   
-  // Detune Control Changes
-  qualitySlider.oninput = e => {
-	  // Sound Change
-	  audio.setQuality(e.target.value);
-	  // Text Change
-	  qualityLabel.innerHTML = e.target.value;
-  };
+  // Enable Quality Change
+ document.querySelector("#qualityCB").oninput = function(e){ 
+	drawParams.soundQuality = !drawParams.soundQuality;
   
-  // Label = Value of slider
- qualitySlider.dispatchEvent(new Event("input"));
+	// Detune Control Changes
+	qualitySlider.oninput = e => {
+
+		// Sound Change
+		audio.setQuality(e.target.value);
+	
+		// Text Change
+		qualityLabel.innerHTML = e.target.value;
+	};
+	// Label = Value of slider
+	qualitySlider.dispatchEvent(new Event("input"));
+	
+	if (!drawParams.soundQuality)
+		audio.resetQuality();
+ };
+  
+
+
 	
 }
 

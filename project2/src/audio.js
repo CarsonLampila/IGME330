@@ -3,7 +3,7 @@ let audioCtx;
 
 // **These are "private" properties - these will NOT be visible outside of this module (i.e. file)**
 // 2 - WebAudio nodes that are part of our WebAudio audio routing graph
-let element, sourceNode, analyserNode, gainNode, qualityFilter;
+let element, sourceNode, analyserNode, gainNode, qualityFilter, qGainNode;
 
 // 3 - here we are faking an enumeration
 const DEFAULTS = Object.freeze({
@@ -54,8 +54,17 @@ analyserNode.fftSize = DEFAULTS.numSamples;
 	gainNode = audioCtx.createGain();
 	gainNode.gain.value = DEFAULTS.gain;
 	
+	
 	// Create detune biquad filter
+	//qualityFilter = audioCtx.createBiquadFilter();
+	
 	qualityFilter = audioCtx.createBiquadFilter();
+	qualityFilter.type = "bandpass";
+	qualityFilter.Q.value = DEFAULTS.quality;
+	
+	qGainNode = audioCtx.createGain();
+	qGainNode.gain.value = DEFAULTS.gain;
+	
 	//detuneFilter.Q.value = DEFAULTS.detune;
 	//detuneFilter.type = "detune";
 
@@ -63,10 +72,12 @@ analyserNode.fftSize = DEFAULTS.numSamples;
 	//sourceNode.connect(analyserNode);
 	//analyserNode.connect(gainNode);
 	//gainNode.connect(audioCtx.destination);
-	sourceNode.connect(analyserNode);
-	analyserNode.connect(gainNode);
-	gainNode.connect(qualityFilter);
-	qualityFilter.connect(audioCtx.destination)
+	sourceNode.connect(qualityFilter);
+	qualityFilter.connect(qGainNode);
+	qGainNode.connect(gainNode);
+	gainNode.connect(analyserNode);
+	analyserNode.connect(audioCtx.destination);
+
 }
 
 function loadSoundFile(filePath){
@@ -84,14 +95,20 @@ function pauseCurrentSound(){
 function setVolume(value){
 	value = Number(value);	// make sure that it's a Number rather than a String
 	gainNode.gain.value = value;
+	//qGainNode.gain.value = value;
 }
 
 function setQuality(value){
-	qualityFilter.gain.value = gainNode.gain.value;
 	qualityFilter.Q.value = value;
-	//detuneFilter.Q.value = value;
-	//qualityFilter.gain.setValueAtTime(0, audioCtx.currentTime);
+	qGainNode.gain.value = value;
+}
+
+function resetQuality(){
+	qualityFilter.Q.value = DEFAULTS.quality;
+	qGainNode.gain.value = DEFAULTS.gain;
 }
 
 
-export {audioCtx,setupWebaudio,playCurrentSound,pauseCurrentSound,loadSoundFile,setVolume,setQuality,analyserNode};
+
+
+export {audioCtx,setupWebaudio,playCurrentSound,pauseCurrentSound,loadSoundFile,setVolume,setQuality,resetQuality,analyserNode};
