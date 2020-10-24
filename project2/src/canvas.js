@@ -20,10 +20,11 @@ let tempPos = 0;
 let dirChange = false;
 
 // Rotation
-let centerAngle = 0;
+let centerAngle = 0, currentAngle = 0;
 
 // Controls
 let lU = false, lD = false, rU = false, rD = false;
+
 
 
 
@@ -300,7 +301,7 @@ function createBall() {
 		
 	// Reset start angle and color
 	let currentColor = 0;
-	let currentAngle = 0;
+	currentAngle = 0;
 
 	// Make sure direction is not up and down
 	let tempDir = utils.getRandomUnitVector();
@@ -648,7 +649,6 @@ function movePaddles(){
 function musicBars(audio){
 	
 	// Angle defenitions
-	let currentAngle = 0;
 	let rotation = .0001;
 	
 	// Loop through ball objects except circle
