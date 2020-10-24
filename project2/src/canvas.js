@@ -79,10 +79,11 @@ function draw(params={}, ctrls={}){
 		// Bounce Ball
 		moveBall(ctrls.paddleCount);	
 	
+	
 		// Reset Pos when out of X and Y bounds
 		if (ball.cX + (ball.size * 3) < 0 ||
-			ball.cX - (ball.size * 3) > canvasWidth ||
 			ball.cY + (ball.size * 3) < 0 ||
+			ball.cX - (ball.size * 3) > canvasWidth ||
 			ball.cY - (ball.size * 3) > canvasHeight){
 				
 			bars = []
@@ -736,9 +737,13 @@ function press(e){
 	// Up Arrow
 	if (e.keyCode === 38)
 		rU = true;
+		// Prevent Scroll
+		e.preventDefault();
 	// Down Arrow
 	if (e.keyCode === 40)
 		rD = true;
+		// Prevent Scroll
+		e.preventDefault();
 }
 
 

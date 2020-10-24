@@ -2,83 +2,125 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
-	<title>Project 2</title>
-	<link href="styles/default-styles.css" type="text/css" rel="stylesheet" />
+	<title>Audio Pong</title>
+	<link href="https://fonts.googleapis.com/css2?family=Titillium+Web&display=swap" rel="stylesheet">
+	<link href="./styles/default-styles.css" type="text/css" rel="stylesheet" />
 	<script src="./src/loader.js" type="module"></script>
 </head>
 <body>
+<header>
+	<h1>Audio Pong</h1>
+</header>
+
 <main>
-	<canvas width="800" height="400"></canvas>
-	<div id="controls">
-		<section>
-			<audio controls src="media/Beetle Juice Theme Song.mp3"></audio>
-		</section>
-		<section>
-			<button id="fsButton">Full Screen</button>
-		
+	<canvas width="1000" height="500"></canvas>
+
+	<section id="mainControls">
+	
+		<div id="playControls">
+			<audio controls src="media/BeetleJuiceTheme.mp3"></audio>
+		</div>
+		<div id="soundControls">
 			<label>Track: 
 				<select id="trackSelect">
-					<option value="media/Beetle Juice Theme Song.mp3" selected>Beetljuice Theme</option>
-					<option value="media/Dark Souls III Soundtrack OST - Deacons of the Deep.mp3">Deacons Theme</option>
-					<option value="media/how to train your dragon - Flying theme.mp3">Flying Theme</option>
+					<option value="media/BeetleJuiceTheme.mp3" selected>Beetljuice Theme</option>
+					<option value="media/DeaconsoftheDeep.mp3">Deacons Theme</option>
+					<option value="media/FlyingTheme.mp3">Flying Theme</option>
 				</select>
 			</label>
-		</section>
+			
+			<label id="volume">Volume: 
+				<input type="range" id="volumeSlider" min="0" max="2" value="1" step="0.01">
+				<span id="volumeLabel">???</span>
+			</label>
+			
+			<button id="fsButton">Full Screen</button>
+		</div>
+	</section>
+	
+	<section id="instructions">
+		<p>Control the Left (and Top) Paddles using the 'W' and 'S' keys. &emsp; &emsp; &emsp; &emsp; &emsp; Control the Right (and Bottom) Paddles using the 'Up-Arrow' and 'Down-Arrow' keys.</p>
+	</section>
+	
+	<section id="additionalControls">
+		<div id="gameplayControls">
+			<label id="ballSpeed">Ball Speed: 
+				<input type="range" id="ballSpeedSlider" min="0.05" max="5" value="2" step="0.05">
+				<span id="ballSpeedLabel">???</span>
+			</label>
+			<label id="paddleSize">Paddle Size:
+				<input type="range" id="paddleSizeSlider" min="5" max="265" value="135" step="5">
+				<span id="paddleSizeLabel">???</span>
+			</label>
+			<label id="paddleSpeed">Paddle Speed:
+				<input type="range" id="paddleSpeedSlider" min="0.05" max="5" value="3" step="0.05">
+				<span id="paddleSpeedLabel">???</span>
+			</label>
+		</div>
 		
-
-		
-		<section>
-			Volume: <input type="range" id="volumeSlider" min="0" max="2" value="1" step="0.01">
-			<span id="volumeLabel">???</span>
-			Ball Speed: <input type="range" id="ballSpeedSlider" min="1" max="5" value="2" step="0.1">
-			<span id="ballSpeedLabel">???</span>
-			Paddle Size: <input type="range" id="paddleSizeSlider" min="50" max="220" value="135" step="5">
-			<span id="paddleSizeLabel">???</span>
-			Paddle Speed: <input type="range" id="paddleSpeedSlider" min="1" max="5" value="3" step="0.1">
-			<span id="paddleSpeedLabel">???</span>
-		</section>
-		<p>Left and Top Paddles = 'W' and 'S'</p>
-		<p>Right and Bottom Paddles = 'Up-Arrow' and 'Down-Arrow'</p>
-	</div>
+		<div id="paddles">
+			<label class="controlLabel">Paddle Style:</label>
+			<span><input type="radio" id="paddlesNone" class="radial" name="paddles"><label for="paddlesNone">No Paddles</label></span>
+			<span><input type="radio" id="paddlesHor" class="radial" name="paddles"><label for="paddlesHor">Horizontal Paddles</label></span>
+			<span><input type="radio" id="paddlesVer" class="radial" name="paddles"><label for="paddlesVer">Vertical Paddles</label></span>
+			<span><input type="radio" id="paddlesAll" class="radial" name="paddles"><label for="paddlesAll">All Paddles</label></span>
+		</div>
+	
+		<div id="freqWave">
+			<label class="controlLabel">Audio Data:</label>		
+			<label>Ball: 
+				<select id="fwCirSelect">
+					<option value="freq">Frequency</option>
+					<option value="wave" selected>Waveform</option>
+				</select>
+			</label>
+						
+			<label>Bars: 
+				<select id="fwBarSelect">
+					<option value="freq" selected>Frequency</option>				
+					<option value="wave">Waveform</option>
+				</select>
+			</label>
+		</div>
+	
+		<div id="gameplayView">
+			<label class="controlLabel">Object Visability:</label>
+			<span><input type="checkbox" id="gradientCB"><label for="gradientCB">Show Gradient</label></span>
+			<span><input type="checkbox" id="circlesCB"><label for="circlesCB">Show Ball</label></span>
+			<span><input type="checkbox" id="barsCB"><label for="barsCB">Show Bars</label></span>
+			<span><input type="checkbox" id="paddlesCB"><label for="paddlesCB">Show Paddles</label></span>
+			<span><input type="checkbox" id="curvesCB"><label for="curvesCB">Show Curves</label></span>
+		</div>
+	
+		<div id="effects">
+			<label class="controlLabel">Effect Visability:</label>
+			<span><input type="checkbox" id="noiseCB"><label for="noiseCB">Show Noise</label></span>
+			<span><input type="checkbox" id="invertCB"><label for="invertCB">Show Invert</label></span>
+			<span><input type="checkbox" id="greyscaleCB"><label for="greyscaleCB">Show Greyscale</label></span>
+			<span><input type="checkbox" id="embossCB"><label for="embossCB">Show Emboss</label></span>
+		</div>
+	
+		<div id="tintAndSound">
+			<div id="tintSelect">
+				<span><input type="checkbox" id="tintCB"><label for="tintCB" class="controlLabel">Show Tint&emsp;</label></span>
+				<select name="tints" id="tints">
+					<option value="red">Red</option>
+					<option value="orange">Orange</option>
+					<option value="yellow">Yellow</option>
+					<option value="green">Green</option>
+					<option value="blue">Blue</option>
+					<option value="purple">Purple</option>
+				</select>
+			</div>
+			
+			<div id="qualitySelect">
+				<span><input type="checkbox" id="qualityCB"><label for="qualityCB" class="controlLabel">Quality Enable&emsp;</label></span>
+				<input type="range" id="qualitySlider" min="0" max="25" value="12.5" step="0.1">
+				<span id="qualityLabel">50</span>
+			</div>
+		</div>
+	</section>
 </main>
-<section>
-	<label>Paddles:&ensp;</label>
-	<label for="paddlesNone">No Paddles</label><input type="radio" id="paddlesNone" class="radial" name="paddles">
-	<label for="paddlesHor">Horizontal Paddles</label><input type="radio" id="paddlesHor" class="radial" name="paddles">
-	<label for="paddlesVer">Vertical Paddles</label><input type="radio" id="paddlesVer" class="radial" name="paddles">
-	<label for="paddlesAll">All Paddles</label><input type="radio" id="paddlesAll" class="radial" name="paddles">
-</section>
-<section>
-  <span><input type="checkbox" id="gradientCB"><label for="gradientCB">Show Gradient</label></span>
-  <span><input type="checkbox" id="freqWaveCirCB"><label for="freqWaveCirCB">Freq/Wave Circle</label></span>
-  <span><input type="checkbox" id="freqWaveBarCB"><label for="freqWaveBarCB">Freq/Wave Bars</label></span>
-  <span><input type="checkbox" id="circlesCB"><label for="circlesCB">Show Ball</label></span>
-  <span><input type="checkbox" id="barsCB"><label for="barsCB">Show Bar</label></span>
-  <span><input type="checkbox" id="paddlesCB"><label for="paddlesCB">Show Paddles</label></span>
-  <span><input type="checkbox" id="curvesCB"><label for="curvesCB">Show Curves</label></span>
-</section>
-<section>
-  <span><input type="checkbox" id="noiseCB"><label for="noiseCB">Show Noise</label></span>
-  <span><input type="checkbox" id="invertCB"><label for="invertCB">Show Invert</label></span>
-  <span><input type="checkbox" id="greyscaleCB"><label for="grayscaleCB">Show Greyscale</label></span>
-  <span><input type="checkbox" id="tintCB"><label for="tintCB">Show Tint</label></span>
-  <span><input type="checkbox" id="embossCB"><label for="embossCB">Show Emboss</label></span>
-</section>
-<section>
-  <label for="tints">Choose a tint:</label>
-  <select name="tints" id="tints">
-    <option value="red">Red</option>
-    <option value="orange">Orange</option>
-    <option value="yellow">Yellow</option>
-    <option value="green">Green</option>
-    <option value="blue">Blue</option>
-    <option value="purple">Purple</option>
-  </select>
-</section>
-<section>
-    <span><input type="checkbox" id="qualityCB"><label for="qualityCB">Quality Enable</label></span>
-	Quality: <input type="range" id="qualitySlider" min="0" max="25" value="0" step="0.1">
-	<span id="qualityLabel">???</span>
-</section>
+
 </body>
 </html>

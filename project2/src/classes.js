@@ -29,6 +29,7 @@ class Sprite{
 	}
 }
 
+
 class BarSprite extends Sprite{
 	constructor(cX=0, cY=0, fX=0, fY=0, size=0, fwd={x:1,y:0}, translateSpeed=0, color="black"){
 		super(cX, cY, fwd, translateSpeed, color);
@@ -50,6 +51,7 @@ class BarSprite extends Sprite{
 		ctx.restore();
 	}
 }
+
 
 class CircleSprite extends Sprite{
 	constructor(cX=0, cY=0, size=1, fwd={x:1,y:0}, translateSpeed=0, color="black"){
@@ -101,6 +103,7 @@ class CircleSprite extends Sprite{
 	}
 }
 
+
 class RectSprite extends Sprite{
 	constructor(cX=0, cY=0, width=1, height=1, fwd={x:0,y:1}, translateSpeed=0, color="black", lineWidth=0, lineColor="white"){
 		super(cX, cY, fwd, translateSpeed, color);
@@ -123,6 +126,7 @@ class RectSprite extends Sprite{
 		ctx.restore();
 	}
 }
+
 
 class CurveSprite extends Sprite{
 	constructor(cX=0, cY=0, fwd={x:0,y:0}, translateSpeed=0, color="black", lineWidth=1, fX, fY, mX, mY){
@@ -152,6 +156,5 @@ class CurveSprite extends Sprite{
 }
 
 
-export {Sprite, BarSprite, CircleSprite, RectSprite, CurveSprite};
-	
 
+export {Sprite, BarSprite, CircleSprite, RectSprite, CurveSprite};

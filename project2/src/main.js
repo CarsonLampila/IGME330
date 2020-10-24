@@ -6,7 +6,7 @@ import * as canvas from './canvas.js';
 
 // Set default song
 const DEFAULTS = Object.freeze({
-	sound1  :  "media/Beetle Juice Theme Song.mp3"
+	sound1  :  "media/BeetleJuiceTheme.mp3"
 });
 
 // Enables
@@ -33,8 +33,9 @@ const ctrlParams = {
 	ballSpeed		: 2,
 	paddleSize		: 135,
 	paddleSpeed		: 3,
-	paddleCount		: 1
+	paddleCount		: 1,
 };
+
 
 
 // Startup
@@ -55,7 +56,6 @@ function init(){
 	
 	// Create Paddles
 	canvas.createPaddles();
-	
 	
 	// Start Loop
 	loop();
@@ -85,14 +85,12 @@ function setupUI(canvasElement){
   
   
   // Track Select
+  // https://www.w3schools.com/tags/tag_select.asp (Drop Downs)
   let trackSelect = document.querySelector("#trackSelect");
   // Track Change
   trackSelect.onchange = e => {
 	  audio.loadSoundFile(e.target.value);
-	  // Pause current
-	  if (playButton.dataset.playing = "yes") {
-		  playButton.dispatchEvent(new MouseEvent("click"));
-	  }
+	  drawParams.paused = true;
   };
   
   
@@ -121,7 +119,7 @@ function setupUI(canvasElement){
 	  // Speed Change
 	  ctrlParams.ballSpeed = e.target.value;
 	  // Text Change
-	  ballSpeedLabel.innerHTML = Math.round(e.target.value);
+	  ballSpeedLabel.innerHTML = e.target.value * 20;
   };
   
   // Label = Value of slider
@@ -137,7 +135,7 @@ function setupUI(canvasElement){
 	  // Size Change
 	  ctrlParams.paddleSize = e.target.value;
 	  // Text Change
-	  paddleSizeLabel.innerHTML = Math.round(e.target.value);
+	  paddleSizeLabel.innerHTML = Math.round(e.target.value * 0.37);
   };
   
   // Label = Value of slider
@@ -153,14 +151,14 @@ function setupUI(canvasElement){
 	  // Size Change
 	  ctrlParams.paddleSpeed = e.target.value;
 	  // Text Change
-	  paddleSpeedLabel.innerHTML = Math.round(e.target.value);
+	  paddleSpeedLabel.innerHTML = e.target.value * 20;
   };
   
   // Label = Value of slider
   paddleSpeedSlider.dispatchEvent(new Event("input"));
   
   
-  // Shape Controls
+  // Paddle Controls
   document.querySelector("#paddlesHor").checked = true;
   document.querySelector("#paddlesNone").onclick = function(e){ ctrlParams.paddleCount = 0; };
   document.querySelector("#paddlesHor").onclick = function(e){ ctrlParams.paddleCount = 1; };
@@ -174,16 +172,33 @@ function setupUI(canvasElement){
 		drawParams.showGradient = !drawParams.showGradient;
 	};
 	
-  // Freq/Wave Circle Checkbox
-  document.querySelector("#freqWaveCirCB").oninput = function(e){ 
-		drawParams.freqWaveCir = !drawParams.freqWaveCir;
-	};
 	
-  // Freq/Wave Bar Checkbox
-  document.querySelector("#freqWaveBarCB").checked = true;
-  document.querySelector("#freqWaveBarCB").oninput = function(e){ 
-		drawParams.freqWaveBar = !drawParams.freqWaveBar;
-	};
+  // Frequency/Wave Circle Select
+  // https://www.w3schools.com/tags/tag_select.asp (Drop Downs)
+  let fwCirSelect = document.querySelector("#fwCirSelect");
+  // Audio Data Change
+  fwCirSelect.onchange = e => {
+	  // Frequency
+	  if (e.target.value == "freq")
+		  drawParams.freqWaveCir = true;
+	  // Waveform
+	  else
+		  drawParams.freqWaveCir = false;
+  };
+  
+  // Frequency/Wave Bar Select
+  // https://www.w3schools.com/tags/tag_select.asp (Drop Downs)
+  let fwBarSelect = document.querySelector("#fwBarSelect");
+  // Audio Data Change
+  fwBarSelect.onchange = e => {
+	  // Frequency
+	  if (e.target.value == "freq")
+		  drawParams.freqWaveBar = true;
+	  // Waveform
+	  else
+		  drawParams.freqWaveBar = false;
+  };
+	
 	
   // Ball Checkbox
   document.querySelector("#circlesCB").checked = true;
@@ -235,6 +250,7 @@ function setupUI(canvasElement){
 	};
 	
   // Tint Change
+  // https://www.w3schools.com/tags/tag_select.asp (Drop Downs)
   document.querySelector("#tints").onchange = function(e){ 
 		drawParams.tintColor = e.target.value;
 	};
@@ -243,46 +259,40 @@ function setupUI(canvasElement){
   // Quality Controls
   let qualitySlider = document.querySelector("#qualitySlider");
   let qualityLabel = document.querySelector("#qualityLabel");
+  // Quality Control Changes
+  qualitySlider.oninput = e => {
+		// Text Change
+		qualityLabel.innerHTML =  Math.round(e.target.value * 4);
+	};
   
   // Enable Quality Change
  document.querySelector("#qualityCB").oninput = function(e){ 
 	drawParams.soundQuality = !drawParams.soundQuality;
   
-	// Detune Control Changes
+	// Quality Control Changes
 	qualitySlider.oninput = e => {
-
 		// Sound Change
-		audio.setQuality(e.target.value);
-	
+		audio.setQuality(e.target.value);	
 		// Text Change
-		qualityLabel.innerHTML = e.target.value;
+		qualityLabel.innerHTML =  Math.round(e.target.value * 4);
 	};
 	// Label = Value of slider
 	qualitySlider.dispatchEvent(new Event("input"));
 	
+	// Reset on disable
 	if (!drawParams.soundQuality)
 		audio.resetQuality();
  };
-  
-
-
-	
 }
+
 
 // Loop
 function loop(){
 
 	requestAnimationFrame(loop);
 	
-	canvas.draw(drawParams, ctrlParams);	
+	canvas.draw(drawParams, ctrlParams);
 }
-
-
-
-
-
-
-
 
 
 
