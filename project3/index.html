@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>Project 3</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
+	<link href="./styles/default-styles.css" type="text/css" rel="stylesheet" />
+	<script src="./src/loader.js" type="module"></script>
+</head>
+<body>
+<div id='map'></div>
+<div id="controls">
+	<select id="dateSelect"></select>
+	
+	<select id="yearSelect">
+		<option value="2019" selected>2019</option>
+		<option value="2018">2018</option>
+		<option value="2017">2017</option>
+		<option value="2016">2016</option>
+		<option value="2015">2015</option>
+		<option value="2014">2014</option>
+		<option value="2013">2013</option>
+	</select>
+	<select id="dataType">
+		<option value="000" selected>Select a Data Type!</option>
+		<option value="001">Total:</option>
+		<option value="002">With an Internet subscription:   </option>
+		<option value="003">Dial-up with no other type of Internet subscription:</option>
+		<option value="004">Broadband of any type:</option>
+		<option value="005">Cellular data plan:</option>
+		<option value="006">Cellular data plan with no other type of Internet subscription:</option>
+		<option value="007">Broadband such as cable, fiber optic or DSL:</option>
+		<option value="008">Broadband such as cable, fiber optic or DSL with no other type of Internet subscription:</option>
+		<option value="009">Satellite Internet service:</option>
+		<option value="010">Satellite Internet service with no other type of Internet subscription:</option>
+		<option value="011">Other service with no other type of Internet subscription:</option>
+		<option value="012">Internet access without a subscription:</option>
+		<option value="013">No Internet access:</option>
+	</select>
+	<select id="region">
+		<option value="00" selected>Select a Region!</option>
+	</select>
+	<select id="state">
+		<option value="00" selected>Select a State!</option>
+	</select>
+	<select id="county">
+		<option value="00" selected>Select a County!</option>
+	</select>
+	<button id="searchBtn">Search</button>
+</div>
+
+</body>
+</html>
