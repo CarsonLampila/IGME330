@@ -1,5 +1,8 @@
 let map
 let markers = [];
+let names = [];
+let coors = [];
+let des = [];
 
 function initMap(){
 	mapboxgl.accessToken = 'pk.eyJ1IjoiY2VsMTM2OSIsImEiOiJja2hmNzYyZDQwb2ExMnpwNXdwaWJyOHllIn0.FPJLn2H_xaYcX9VRMEpoUA';
@@ -37,17 +40,23 @@ function addMarkersToMap(geojson){
 }
 
 function removeAllMarkers(){
-  for(let m of markers){
-    m.remove();
-  }
-  markers = [];
+
+	for(let m of markers){
+		m.remove();
+	}
+	markers = [];
+	names = [];
+	coors = [];
+	des = [];
 }
 
 function createLayers(geojson){
 	// https://docs.mapbox.com/mapbox-gl-js/api/#map#loaded
 	if(map.loaded()){
+		console.log("yes");
 		addCircleAndTextLayers();
 	}else{
+		console.log("no");
 		map.on('load',addCircleAndTextLayers);
 	}
 	
@@ -206,4 +215,107 @@ function updateGeoJSON(geojson, index){
 	map.getSource('cases').setData(geojson);
 }
 
-export {map, initMap, addMarkersToMap, createLayers, makeGeoJSON, updateGeoJSON};
+
+
+function calcMarkers(scale, dups){
+		
+	// loop through all states
+	for (let i = 1; i < scale.length; i++){
+		
+		
+		// Generate URL
+		const xhr = new XMLHttpRequest();
+		const key = "pk.eyJ1IjoiY2VsMTM2OSIsImEiOiJja2hmNzYyZDQwb2ExMnpwNXdwaWJyOHllIn0.FPJLn2H_xaYcX9VRMEpoUA";
+		
+		let area = scale.options[i].text
+		
+		// If county
+		if (dups)
+			area += (" " + scale.options[i].inherit.text);
+
+		const url = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + area + ".json?access_token=" + key;
+		
+		// `onerror` error
+		xhr.onerror = (e) => console.log("error");
+			
+		// `onload` handler
+		xhr.onload = (e) => {	
+
+			// Get and display data
+			const jsonString = e.target.response;
+			const json = JSON.parse(jsonString);
+			
+			names.push(area);
+			coors.push([+json.features[0].geometry.coordinates[0], +json.features[0].geometry.coordinates[1]])
+			des.push(scale.options[i].value);
+		};
+			
+		// Open the connection using the HTTP GET method
+		xhr.open("GET",url);
+	
+		// Send request
+		xhr.send();	
+	}
+}
+
+function makeGeoJSONState(){
+	// 1 - our "starter" 'FeatureCollection' object we will be returning
+	let geojson = {type: 'FeatureCollection', features: [] };
+
+	// 2 - loop through all the regions
+	for (let i = 0; i < names.length; i++){
+		
+		// 3 - Here's am "empty" GeoJSON "feature"
+		const newFeature = {
+			type: 'Feature',
+			geometry: {
+				type: 'Point',
+				coordinates: []
+			},
+			properties: {
+				title: '',
+				description: 'None'
+			}
+		};
+		
+		// 4 - initialize `.geometry.coordinates`		
+		newFeature.geometry.coordinates = [coors[i][0], coors[i][1]];
+		
+		// 5 - initialize `.properties.title` - and do so differently based on
+		// whether or not the region has a `.provinceOrState` property
+		newFeature.properties.title = names[i];
+		
+		// 8 - initialize `.properties.description`
+		newFeature.properties.description = des[i];
+		
+		// 9 - add the new feature to the array
+		geojson.features.push(newFeature);
+	}
+	
+	return geojson;
+}
+
+
+function addStateMarker(geojson){
+	
+	// add markers to map
+	for (let feature of geojson.features) {
+		
+		// create a HTML element for each feature
+		let el = document.createElement('div');
+		el.className = 'marker';
+
+		// make a marker for each feature and add to the map
+		let marker = new mapboxgl.Marker(el)
+			.setLngLat(feature.geometry.coordinates)
+			.setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
+			.setHTML('<h3>' + feature.properties.title + '</h3><p>' + feature.properties.description + '</p>'))
+			.addTo(map);
+			
+		markers.push(marker);
+	};
+}
+
+
+
+export {map, initMap, addMarkersToMap, createLayers, makeGeoJSON, updateGeoJSON, calcMarkers, makeGeoJSONState, addStateMarker, removeAllMarkers};

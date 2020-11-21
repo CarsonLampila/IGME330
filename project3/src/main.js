@@ -13,11 +13,16 @@ let geojson = {
 
 function init(){
 	maps.initMap();
-	loadMapData();
+	
+		
+	setupUI();
+	
+	//loadMapData();
 	loadSearchData();
 }
 
 function loadMapData(){
+	
 	const url = "data/time_series_covid19_confirmed_global.csv";
 
 	
@@ -36,6 +41,7 @@ function loadMapData(){
 	
 	// start download
 	ajax.downloadFile(url, dataLoaded);
+	
 }
 
 function loadSearchData(){
@@ -116,6 +122,9 @@ function parseCSV(string){
 
 
 function setupUI(){
+	
+	/*
+	
 	// 1 - clear out the <select>
 	dateSelect.innerHTML = "";
 	
@@ -143,8 +152,35 @@ function setupUI(){
 		maps.addMarkersToMap(geojson);
 	};
 	
+	*/
+	
 	// Search returns selected value
 	searchBtn.onclick = e => {
+			
+		console.log("sea");
+		
+		// Add selected markers
+		
+		//let scale = region;
+		
+		// State
+		if (region.value != 0)
+			maps.calcMarkers(state, false);
+		// County
+		if (state.value != 0)
+			maps.calcMarkers(county, true);
+		
+
+		setTimeout(function(){ 
+			geojson = maps.makeGeoJSONState(); 
+			maps.addStateMarker(geojson);
+		}, 100);
+
+	
+		// Reset on Search
+		resetVars();
+
+		
 		// Data type selected
 		if (dataType.value != 0){		
 			// Region selected
@@ -166,73 +202,127 @@ function setupUI(){
 				let added = (+region[1].value) + (+region[2].value) + (+region[3].value) + (+region[4].value);
 				console.log(added);
 			}
-
 		}
-		else{
+		else
 			console.log("Please Select a Data Type First!");
-		}
+	};
+	
+	resetBtn.onclick = e => {
+		yearSelect.options[0].selected = true;
+		dataType.options[0].selected = true;
+		clearSelect(region);
+		clearSelect(state);
+		clearSelect(county);
+
+		resetVars();
 	};
 }
 
 function createDropDown(json, scale, size, area = "none"){
-						
-	let order = 1;
-	let add = true;
+	
+	// Variables
+	let order = 1;	
+	let add = false;
+	let prev = "";	
+
 	
 	// Loop through data
-	for (let i = 0; i < json.length; i++){				
-		
-		// Add coresponding states
+	for (let i = 0; i < json.length; i++){		
+
+		// Add regions
+		if (size == "region"){
+			
+			// Loop through all data
+			for (let j = 0; j < json.length; j++){
+								
+				// Add alphabetically
+				if (json[j][2] == order){
+								
+					// Add select option
+					let newOption = document.createElement("option");
+					newOption.text = json[j][0];
+					newOption.value = json[j][1];				
+					scale.add(newOption);				
+								
+					// Next + Exit
+					order++;
+					break;
+				}
+			}
+		}
+
+		// Add states
 		if (size == "state"){
 
 			add = false;
 			
+			// Hard coded because states are ordered 1-72 with 52 total elements not in numerical order and not in alphabetical order
 			switch(area){
-				case "none":
-					break;
-			
+		
 				case "Northeast Region":
 					// States within
-					if (order == 9 || order == 23 || order == 25 || order == 33 || order == 34 || order == 36 || order == 42 || order == 44 || order == 50)
+					if (json[i][0] == "Connecticut" && prev == "" || json[i][0] == "Maine" && prev == "Connecticut" || json[i][0] ==  "Massachusetts" && prev == "Maine" || 
+						json[i][0] == "New Hampshire" && prev == "Massachusetts" || json[i][0] == "New Jersey" && prev == "New Hampshire" || json[i][0] == "New York" && prev == "New Jersey" || 
+						json[i][0] == "Pennsylvania" && prev == "New York" || json[i][0] == "Rhode Island" && prev == "Pennsylvania" || json[i][0] ==  "Vermont" && prev == "Rhode Island"){
+									
 						add = true;
-					else
-						// Interval
-						order++;
+						prev = json[i][0];				
+					}
 					break;
 				
 				case "Midwest Region":
 					// States within
-					if (order == 17 || order == 18 || order == 19 || order == 20 || order == 26 || order == 27 || order == 29 || order == 31 || order == 38 || order == 39 || order == 46 || order == 55)
+					if (json[i][0] == "Illinois" && prev == "" || json[i][0] == "Indiana" && prev == "Illinois" || json[i][0] == "Iowa" && prev == "Indiana" || json[i][0] == "Kansas" && prev == "Iowa" || 
+						json[i][0] == "Michigan" && prev == "Kansas" || json[i][0] == "Minnesota" && prev == "Michigan" || json[i][0] == "Missouri" && prev == "Minnesota" || 
+						json[i][0] == "Nebraska" && prev == "Missouri" || json[i][0] == "North Dakota" && prev == "Nebraska" || json[i][0] == "Ohio" && prev == "North Dakota" || 
+						json[i][0] == "South Dakota" && prev == "Ohio" || json[i][0] == "Wisconsin" && prev == "South Dakota"){
+						
 						add = true;
-					else
-						// Interval
-						order++;
+						prev = json[i][0];	
+					}
 					break;
 				
 				case "South Region":
 					// States within
-					if (order == 1 || order == 5 || order == 10 || order == 11 || order == 12 || order == 13 || order == 21 || order == 22 || order == 24 || order == 28 || order == 37 || order == 40 || 
-						order == 45 || order == 47 || order == 48 || order == 51 || order == 54)
+					if (json[i][0] == "Alabama" && prev == "" || json[i][0] == "Arkansas" && prev == "Alabama" || json[i][0] == "Delaware" && prev == "Arkansas" || 
+						json[i][0] == "District of Columbia" && prev == "Delaware" || json[i][0] == "Florida" && prev == "District of Columbia" || json[i][0] == "Georgia" && prev == "Florida" || 
+						json[i][0] == "Kentucky" && prev == "Georgia" || json[i][0] == "Louisiana" && prev == "Kentucky" || json[i][0] == "Maryland" && prev == "Louisiana" || 
+						json[i][0] == "Mississippi" && prev == "Maryland" || json[i][0] == "North Carolina" && prev == "Mississippi" || json[i][0] ==  "Oklahoma" && prev == "North Carolina" || 
+						json[i][0] == "South Carolina" && prev == "Oklahoma" || json[i][0] == "Tennessee" && prev == "South Carolina" || json[i][0] == "Texas" && prev == "Tennessee" || 
+						json[i][0] == "Virginia" && prev == "Texas" || json[i][0] == "West Virginia" && prev == "Virginia"){
+						
 						add = true;
-					else
-						// Interval
-						order++;
+						prev = json[i][0];
+					}
 					break;
 				
 				case "West Region":
 					// States within
-					if (order == 2 || order == 4 || order == 6 || order == 8 || order == 15 || order == 16 || order == 30 || order == 32 || order == 35 || order == 41 || order == 49 || order == 53 || order == 56)
+					if (json[i][0] == "Alaska" && prev == "" || json[i][0] == "Arizona" && prev == "Alaska" || json[i][0] == "California" && prev == "Arizona" || json[i][0] == "Colorado" && prev == "California" || 
+						json[i][0] == "Hawaii" && prev == "Colorado" || json[i][0] == "Idaho" && prev == "Hawaii" || json[i][0] == "Montana" && prev == "Idaho" || json[i][0] == "Nevada" && prev == "Montana" || 
+						json[i][0] == "New Mexico" && prev == "Nevada" || json[i][0] == "Oregon" && prev == "New Mexico" || json[i][0] == "Utah" && prev == "Oregon" || json[i][0] == "Washington" && prev == "Utah" || 
+						json[i][0] == "Wyoming" && prev == "Washington"){
+						
 						add = true;
-					else
-						// Interval
-						order++;
+						prev = json[i][0];					
+					}
 					break;
 			}	
+			
+			// Add select option
+			if (add){
+				
+				let newOption = document.createElement("option");
+				newOption.text = json[i][0];
+				newOption.value = json[i][1];				
+				scale.add(newOption);
+				
+				i = 0;
+			}
 		}
-		
-		// Add coresponding counties
+
+		// Add counties
 		if (size == "county"){
-			add = false;
 			
 			// Split
 			let contain = json[i][0].split(", ");
@@ -244,30 +334,7 @@ function createDropDown(json, scale, size, area = "none"){
 				newOption.value = json[i][1];	
 				newOption.inherit = contain[1];
 				scale.add(newOption);
-			}	
-			// Interval
-			order++;				
-		}
-		
-		// Add region/states to dropdowns
-		if (add){
-			// Loop through all data
-			for (let j = 0; j < json.length; j++){
-				// Add alphabetically
-				if (json[j][2] == order){
-					
-					// Add select option
-					let newOption = document.createElement("option");
-					newOption.text = json[j][0];
-					newOption.value = json[j][1];				
-					scale.add(newOption);
-					
-								
-					// Next + Exit
-					order++;
-					break;
-				}
-			}
+			}				
 		}
 	}
 }
@@ -393,6 +460,14 @@ function reload(){
 		// Send request
 		xhr.send();			
 	}	
+}
+
+function resetVars(){
+	maps.removeAllMarkers();
+	geojson = {
+		type: 'FeatureCollection',
+		features: []
+	};
 }
 
 
