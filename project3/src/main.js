@@ -156,19 +156,18 @@ function setupUI(){
 	
 	// Search returns selected value
 	searchBtn.onclick = e => {
-			
-		console.log("sea");
+				
+		console.log("search");
 		
-		// Add selected markers
-		
-		//let scale = region;
-		
-		// State
-		if (region.value != 0)
-			maps.calcMarkers(state, false);
 		// County
 		if (state.value != 0)
 			maps.calcMarkers(county, true);
+		
+		// State
+		else if (region.value != 0)
+			maps.calcMarkers(state, false);
+		
+
 		
 
 		setTimeout(function(){ 
@@ -176,9 +175,6 @@ function setupUI(){
 			maps.addStateMarker(geojson);
 		}, 100);
 
-	
-		// Reset on Search
-		resetVars();
 
 		
 		// Data type selected
@@ -205,6 +201,10 @@ function setupUI(){
 		}
 		else
 			console.log("Please Select a Data Type First!");
+			
+			
+		// Reset on Search
+		resetVars();	
 	};
 	
 	resetBtn.onclick = e => {
@@ -330,9 +330,9 @@ function createDropDown(json, scale, size, area = "none"){
 			// Add counties to dropdowns
 			if (area == contain[1]){	
 				let newOption = document.createElement("option");
-				newOption.text = contain[0];
-				newOption.value = json[i][1];	
-				newOption.inherit = contain[1];
+				newOption.text = contain[1];
+				newOption.value = json[i][1];
+				newOption.label = contain[0];		
 				scale.add(newOption);
 			}				
 		}
@@ -447,8 +447,8 @@ function reload(){
 						// Split
 						let contain = json[j][0].split(", ");
 						// Some counties have the same name
-						if (county.options[i].text == contain[0] && county.options[i].inherit == contain[1])
-							county.options[i].value = json[j][1];
+						if (county.options[i].label == contain[0] && county.options[i].text == contain[1])
+							county.options[i].value.worth = json[j][1];
 					}		
 				}
 			}

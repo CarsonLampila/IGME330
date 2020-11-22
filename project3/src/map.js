@@ -53,10 +53,8 @@ function removeAllMarkers(){
 function createLayers(geojson){
 	// https://docs.mapbox.com/mapbox-gl-js/api/#map#loaded
 	if(map.loaded()){
-		console.log("yes");
 		addCircleAndTextLayers();
 	}else{
-		console.log("no");
 		map.on('load',addCircleAndTextLayers);
 	}
 	
@@ -217,7 +215,7 @@ function updateGeoJSON(geojson, index){
 
 
 
-function calcMarkers(scale, dups){
+function calcMarkers(scale, div){
 		
 	// loop through all states
 	for (let i = 1; i < scale.length; i++){
@@ -227,13 +225,18 @@ function calcMarkers(scale, dups){
 		const xhr = new XMLHttpRequest();
 		const key = "pk.eyJ1IjoiY2VsMTM2OSIsImEiOiJja2hmNzYyZDQwb2ExMnpwNXdwaWJyOHllIn0.FPJLn2H_xaYcX9VRMEpoUA";
 		
-		let area = scale.options[i].text
+		let area = scale.options[i].text;
+		let searchArea = area;
 		
 		// If county
-		if (dups)
-			area += (" " + scale.options[i].inherit.text);
-
-		const url = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + area + ".json?access_token=" + key;
+		if (div){
+			area = scale.options[i].label;
+			searchArea = (scale.options[i].label + " " + scale.options[i].text);
+		}
+			
+		
+		const url = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + searchArea + ".json?access_token=" + key;
+		
 		
 		// `onerror` error
 		xhr.onerror = (e) => console.log("error");
@@ -246,7 +249,7 @@ function calcMarkers(scale, dups){
 			const json = JSON.parse(jsonString);
 			
 			names.push(area);
-			coors.push([+json.features[0].geometry.coordinates[0], +json.features[0].geometry.coordinates[1]])
+			coors.push([+json.features[0].geometry.coordinates[0], +json.features[0].geometry.coordinates[1]]);
 			des.push(scale.options[i].value);
 		};
 			
