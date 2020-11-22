@@ -1,5 +1,3 @@
-import * as ajax from "./ajax.js";
-import * as classes from "./classes.js";
 import * as maps from "./map.js";
 
 let dates;
@@ -12,40 +10,14 @@ let geojson = {
 };
 
 function init(){
-	maps.initMap();
 	
-		
+	maps.initMap();	
 	setupUI();
-	
-	//loadMapData();
-	loadSearchData();
 }
 
-function loadMapData(){
-	
-	const url = "data/time_series_covid19_confirmed_global.csv";
 
+function setupUI(){
 	
-	// callback function for when data shows up
-	function dataLoaded(string){
-		//console.log(`string=${string}`);
-		let regions = parseCSV(string);
-		//console.log(regions);
-		geojson = maps.makeGeoJSON(regions, index);
-		maps.addMarkersToMap(geojson);
-		maps.createLayers(geojson)
-		console.log(geojson);
-		
-		setupUI();
-	}
-	
-	// start download
-	ajax.downloadFile(url, dataLoaded);
-	
-}
-
-function loadSearchData(){
-
 	yearSelect.onchange = (e) => {	
 		// Reload with new data	
 		if (dataType.value != 0)
@@ -57,6 +29,8 @@ function loadSearchData(){
 		loadURLData(e);
 		reload();	
 	}
+	
+	
 	region.onchange = (e) => {
 		// Clear
 		clearSelect(state);
@@ -64,104 +38,29 @@ function loadSearchData(){
 		// Reload
 		loadURLData(e);
 	}
+	
+	
 	state.onchange = (e) => {
 		// Clear
 		clearSelect(county);
 		// Reload
 		loadURLData(e);
 	}
+	
+	
 	county.onchange = (e) => {
 		// Reload
 		loadURLData(e);
 	}
-}
-
-function parseCSV(string){
-	// 1 - `regions` will hold `Region` instances
-	let regions = [];
-		
-	// 2 - Currently the entire file is just one big String
-	// So we'll turn it into an array of `rows` by "splitting" on new line characterSet
-	// We'll also get rif of any leading or trailing spaces with `.trim()`
-	let rows = string.trim().split("\n");
 	
-	// 3 - We'll grab the first row of the file - which is the names of the fields 
-	// Province/State, Country/Region, Lat, Long, 11/13/2020
-	let fieldNames = rows.shift().split(",");
-	// get rid of the first 4 field names, which leaves us with just the dates
-	fieldNames.splice(0,4);
-	// the `dates` variable now points at this array of dates
-	dates = fieldNames;
-	// this will be the most recent date in the spreadsheet (the rightmost column)
-	index = dates.length - 1;
 		
-	// 4 - loop through `rows` and split again, this time on commas
-	// this gives us an array of values
-	// starting at the value for the first date in the spreadsheet
-	for (let row of rows){
-		row = row.split(",");
-		regions.push(new classes.Region(row));
-	}
-		
-	// 5 - here's the rejex we'll use to detect 1 or more commas inside of quotes
-	// https://stackoverflow.com/questions/26664371/remove-more-than-one-comma-in-between-quotes-in-csv-file-using-regex?rq=1
-	const regex = /,(?!(([^"]*"){2})*[^"]*$)/;
-	for (let row of rows){
-		// 6 - replace the commas inside of quotes with a dash
-		row = row.replace(regex, " - ");
-		
-		// 7 - get rid of all (that's what /g does) quotes in the `row` (we don't need them anymore)
-		row = row.replace(/"/g,"");
-		
-		// 8 - the extra comma(s) and quotes are gone - now turn `row` into an array
-		row = row.split(",");
-		regions.push(new classes.Region(row));
-	}	
-	return regions;
-}
-
-
-function setupUI(){
-	
-	/*
-	
-	// 1 - clear out the <select>
-	dateSelect.innerHTML = "";
-	
-	// 2 - loop through `dates` array
-	for (let d of dates){
-		// add an <option> for each date
-		let option = document.createElement("option");
-		option.innerText = d;
-		dateSelect.appendChild(option);
-	}
-
-	// 3 - make the last date the selected one
-	dateSelect.lastChild.selected = "selected"; // show last date
-	
-	// 4 - when the <select> is changed ...
-	dateSelect.onchange = e => {
-		// get the value (the text, in this case) of the current <option>
-		let value = e.target.value.trim();
-		
-		// look for that value in the `dates` array
-		index = dates.findIndex(el => el.trim() == value);
-		console.log(`index is now ${index}`);
-		
-		maps.updateGeoJSON(geojson, index);
-		maps.addMarkersToMap(geojson);
-	};
-	
-	*/
-	
 	// Search returns selected value
 	searchBtn.onclick = e => {
 				
-		console.log("seat");
+		console.log("search");
 		
 		// Reset on Search
 		resetMap();	
-		
 		
 		// Specific County
 		if (county.value != 0)
@@ -182,8 +81,8 @@ function setupUI(){
 
 		// Allow time to process
 		setTimeout(function(){ 
-			geojson = maps.makeGeoJSONState(); 
-			maps.addStateMarker(geojson);
+			geojson = maps.makeGeoJSON(); 
+			maps.addMarker(geojson);
 		}, 1000);
 
 		
@@ -210,8 +109,8 @@ function setupUI(){
 			}
 		}
 		else
-			console.log("Please Select a Data Type First!");
-			
+			alert("Please Select a Data Type First!");
+	
 	};
 	
 	resetBtn.onclick = e => {
@@ -226,6 +125,51 @@ function setupUI(){
 		resetMap();
 	};
 }
+
+
+function loadURLData(e){
+			
+	// Make URL
+	const xhr = new XMLHttpRequest();
+		
+	let size = "region";
+	if (region.value != 0)
+		size = "state";	
+	if (state.value != 0)
+		size = "county";
+			
+	const key = "27b8b7f546e9bb3da4d5c38c3c3f784e09b51f5d";
+	const url = "https://api.census.gov/data/" + yearSelect.value + "/acs/acs1?get=NAME,B28002_" + dataType.value + "E&for=" + size + ":*&key=" + key;
+		
+		
+	// `onerror` error
+	xhr.onerror = (e) => console.log("error");
+			
+	// `onload` handler
+	xhr.onload = (e) => {	
+
+		// Get and display data
+		const jsonString = e.target.response;
+		const json = JSON.parse(jsonString);
+
+		// Create region dropdown
+		if (size == "region")
+			createDropDown(json, region, size);	
+		// Create state dropdown
+		if (size == "state")
+			createDropDown(json, state, size, region.options[region.selectedIndex].text);
+		// Create county dropdown
+		if (size == "county")
+			createDropDown(json, county, size, state.options[state.selectedIndex].text);
+	};
+			
+	// Open the connection using the HTTP GET method
+	xhr.open("GET",url);
+	
+	// Send request
+	xhr.send();		
+}
+
 
 function createDropDown(json, scale, size, area = "none"){
 	
@@ -347,56 +291,7 @@ function createDropDown(json, scale, size, area = "none"){
 		}
 	}
 }
-function loadURLData(e){
-			
-	// Make URL
-	const xhr = new XMLHttpRequest();
-		
-	let size = "region";
-	if (region.value != 0)
-		size = "state";	
-	if (state.value != 0)
-		size = "county";
-			
-	const key = "27b8b7f546e9bb3da4d5c38c3c3f784e09b51f5d";
-	const url = "https://api.census.gov/data/" + yearSelect.value + "/acs/acs1?get=NAME,B28002_" + dataType.value + "E&for=" + size + ":*&key=" + key;
-		
-		
-	// `onerror` error
-	xhr.onerror = (e) => console.log("error");
-			
-	// `onload` handler
-	xhr.onload = (e) => {	
-
-		// Get and display data
-		const jsonString = e.target.response;
-		const json = JSON.parse(jsonString);
-
-		// Create region dropdown
-		if (size == "region")
-			createDropDown(json, region, size);	
-		// Create state dropdown
-		if (size == "state")
-			createDropDown(json, state, size, region.options[region.selectedIndex].text);
-		// Create county dropdown
-		if (size == "county")
-			createDropDown(json, county, size, state.options[state.selectedIndex].text);
-	};
-			
-	// Open the connection using the HTTP GET method
-	xhr.open("GET",url);
 	
-	// Send request
-	xhr.send();		
-}
-	
-function clearSelect(scale){
-	// Delete all but first element (blank)
-	let length = scale.length;
-	for (let i = 0; i < length; i++){	
-		scale.options[length - i] = null
-	}
-}
 
 function reload(){
 	
@@ -457,7 +352,7 @@ function reload(){
 						let contain = json[j][0].split(", ");
 						// Some counties have the same name
 						if (county.options[i].label == contain[0] && county.options[i].text == contain[1])
-							county.options[i].value.worth = json[j][1];
+							county.options[i].value = json[j][1];
 					}		
 				}
 			}
@@ -470,6 +365,16 @@ function reload(){
 		xhr.send();			
 	}	
 }
+
+
+function clearSelect(scale){
+	// Delete all but first element (blank)
+	let length = scale.length;
+	for (let i = 0; i < length; i++){	
+		scale.options[length - i] = null
+	}
+}
+
 
 function resetMap(){
 	maps.removeAllMarkers();
