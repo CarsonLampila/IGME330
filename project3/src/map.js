@@ -216,24 +216,50 @@ function updateGeoJSON(geojson, index){
 
 
 function calcMarkers(scale, div){
-		
-	// loop through all states
+	
+	// Define 
+	let repeat = false;
+
+	// loop through drop down
 	for (let i = 1; i < scale.length; i++){
 		
+		// Define
+		let area;
+		let searchArea;
 		
 		// Generate URL
 		const xhr = new XMLHttpRequest();
 		const key = "pk.eyJ1IjoiY2VsMTM2OSIsImEiOiJja2hmNzYyZDQwb2ExMnpwNXdwaWJyOHllIn0.FPJLn2H_xaYcX9VRMEpoUA";
 		
-		let area = scale.options[i].text;
-		let searchArea = area;
 		
-		// If county
-		if (div){
-			area = scale.options[i].label;
-			searchArea = (scale.options[i].label + " " + scale.options[i].text);
+		switch(div){
+			// Specific County
+			case 1:
+				if (repeat == false){
+					area = scale.options[scale.selectedIndex].label;
+					searchArea = (scale.options[scale.selectedIndex].text + " " + scale.options[scale.selectedIndex].label);
+					repeat = true;
+				}
+				break;
+				
+			// County
+			case 2:
+				area = scale.options[i].label;
+				searchArea = (scale.options[i].text + " " + scale.options[i].label);
+				break;
+				
+			// State
+			case 3:
+				area = scale.options[i].text;
+				searchArea = area;
+				break;
+				
+			// Region
+			case 4:
+				area = scale.options[i].text;
+				searchArea = area;
+				break;		
 		}
-			
 		
 		const url = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + searchArea + ".json?access_token=" + key;
 		
@@ -247,9 +273,38 @@ function calcMarkers(scale, div){
 			// Get and display data
 			const jsonString = e.target.response;
 			const json = JSON.parse(jsonString);
-			
+	
+			// Add marker vars
 			names.push(area);
-			coors.push([+json.features[0].geometry.coordinates[0], +json.features[0].geometry.coordinates[1]]);
+			
+			
+			// Region hard code due to lack of available api coords
+			if (div == 4)
+				switch(i){
+					// NE
+					case 1:
+						coors.push([-72.9432, 42.3081]);
+						break;
+						
+					// MW
+					case 2:
+						coors.push([-92.1723, 42.3207]);					
+						break;
+						
+					// S
+					case 3:
+						coors.push([-84.8914, 35.1210]);	
+						break;
+						
+					// W
+					case 4:
+						coors.push([-113.1809, 41.1388]);
+						break;
+				}
+			else
+				coors.push([+json.features[0].geometry.coordinates[0], +json.features[0].geometry.coordinates[1]]);
+						
+			
 			des.push(scale.options[i].value);
 		};
 			

@@ -157,24 +157,34 @@ function setupUI(){
 	// Search returns selected value
 	searchBtn.onclick = e => {
 				
-		console.log("search");
+		console.log("seat");
+		
+		// Reset on Search
+		resetMap();	
+		
+		
+		// Specific County
+		if (county.value != 0)
+			maps.calcMarkers(county, 1);
 		
 		// County
-		if (state.value != 0)
-			maps.calcMarkers(county, true);
+		else if (state.value != 0)
+			maps.calcMarkers(county, 2);
 		
 		// State
 		else if (region.value != 0)
-			maps.calcMarkers(state, false);
+			maps.calcMarkers(state, 3);
+			
+		// Region
+		else
+			maps.calcMarkers(region, 4);
 		
 
-		
-
+		// Allow time to process
 		setTimeout(function(){ 
 			geojson = maps.makeGeoJSONState(); 
 			maps.addStateMarker(geojson);
-		}, 100);
-
+		}, 1000);
 
 		
 		// Data type selected
@@ -202,19 +212,18 @@ function setupUI(){
 		else
 			console.log("Please Select a Data Type First!");
 			
-			
-		// Reset on Search
-		resetVars();	
 	};
 	
 	resetBtn.onclick = e => {
+		// Move Selects
 		yearSelect.options[0].selected = true;
 		dataType.options[0].selected = true;
+		// Clear Dropdowns
 		clearSelect(region);
 		clearSelect(state);
 		clearSelect(county);
-
-		resetVars();
+		// Reset Map
+		resetMap();
 	};
 }
 
@@ -462,7 +471,7 @@ function reload(){
 	}	
 }
 
-function resetVars(){
+function resetMap(){
 	maps.removeAllMarkers();
 	geojson = {
 		type: 'FeatureCollection',
