@@ -2,6 +2,7 @@ import * as maps from "./map.js";
 
 let dates;
 let index;
+let dateRange = [];
 
 
 let geojson = {
@@ -10,7 +11,6 @@ let geojson = {
 };
 
 function init(){
-	
 	maps.initMap();	
 	setupUI();
 }
@@ -18,16 +18,35 @@ function init(){
 
 function setupUI(){
 	
-	yearSelect.onchange = (e) => {	
+	startYearSelect.onchange = (e) => {	
 		// Reload with new data	
-		if (dataType.value != 0)
-			reload();	
+		if (dataType.value != 0){
+			dateRange = [];
+			rangeLoad();
+		}
 	}
+	
+	
+	endYearSelect.onchange = (e) => {	
+		// Reload with new data	
+		if (dataType.value != 0){
+			reload();	
+			rangeLoad();
+		}
+	}
+		
 		
 	dataType.onchange = (e) => {
 		// Reload with new data
-		loadURLData(e);
-		reload();	
+		
+		if (region.length > 1){
+			reload();	
+			rangeLoad();
+		}
+		else{
+			loadURLData(e);
+		}
+
 	}
 	
 	
@@ -58,6 +77,7 @@ function setupUI(){
 	searchBtn.onclick = e => {
 				
 		console.log("search");
+			
 		
 		// Reset on Search
 		resetMap();	
@@ -82,40 +102,19 @@ function setupUI(){
 		// Allow time to process
 		setTimeout(function(){ 
 			geojson = maps.makeGeoJSON(); 
-			maps.addMarker(geojson);
+			maps.addMarker(geojson, dateRange);
 		}, 1000);
 
 		
 		// Data type selected
-		if (dataType.value != 0){		
-			// Region selected
-			if (region.value != 0){				
-				let selected = region;	
-				// State selected
-				if (state.value != 0){	
-					selected = state;	
-					// County selected
-					if (county.value != 0){	
-						selected = county;	
-					}					
-				}
-				// Print
-				console.log(selected.value);
-			}
-			else{
-				// Add region values
-				let added = (+region[1].value) + (+region[2].value) + (+region[3].value) + (+region[4].value);
-				console.log(added);
-			}
-		}
-		else
+		if (dataType.value == 0)		
 			alert("Please Select a Data Type First!");
-	
 	};
 	
 	resetBtn.onclick = e => {
 		// Move Selects
-		yearSelect.options[0].selected = true;
+		endYearSelect.options[0].selected = true;
+		startYearSelect.options[1].selected = true;
 		dataType.options[0].selected = true;
 		// Clear Dropdowns
 		clearSelect(region);
@@ -139,7 +138,7 @@ function loadURLData(e){
 		size = "county";
 			
 	const key = "27b8b7f546e9bb3da4d5c38c3c3f784e09b51f5d";
-	const url = "https://api.census.gov/data/" + yearSelect.value + "/acs/acs1?get=NAME,B28002_" + dataType.value + "E&for=" + size + ":*&key=" + key;
+	const url = "https://api.census.gov/data/" + endYearSelect.value + "/acs/acs1?get=NAME,B28002_" + dataType.value + "E&for=" + size + ":*&key=" + key;
 		
 		
 	// `onerror` error
@@ -194,7 +193,7 @@ function createDropDown(json, scale, size, area = "none"){
 					// Add select option
 					let newOption = document.createElement("option");
 					newOption.text = json[j][0];
-					newOption.value = json[j][1];				
+					newOption.value = json[j][1];						
 					scale.add(newOption);				
 								
 					// Next + Exit
@@ -311,7 +310,7 @@ function reload(){
 			size = "county";
 			
 		const key = "27b8b7f546e9bb3da4d5c38c3c3f784e09b51f5d";
-		const url = "https://api.census.gov/data/" + yearSelect.value + "/acs/acs1?get=NAME,B28002_" + dataType.value + "E&for=" + size + ":*&key=" + key;
+		const url = "https://api.census.gov/data/" + endYearSelect.value + "/acs/acs1?get=NAME,B28002_" + dataType.value + "E&for=" + size + ":*&key=" + key;
 			
 		
 		// `onerror` error
@@ -367,6 +366,78 @@ function reload(){
 }
 
 
+function rangeLoad(){
+	
+		
+	// Make URL
+	const xhr = new XMLHttpRequest();
+		
+	let size = "region";
+	if (region.value != 0)
+		size = "state";	
+	if (state.value != 0)
+		size = "county";
+
+			
+	const key = "27b8b7f546e9bb3da4d5c38c3c3f784e09b51f5d";
+	const url = "https://api.census.gov/data/" + startYearSelect.value + "/acs/acs1?get=NAME,B28002_" + dataType.value + "E&for=" + size + ":*&key=" + key;
+			
+		
+	// `onerror` error
+	xhr.onerror = (e) => console.log("error");
+			
+	// `onload` handler
+	xhr.onload = (e) => {	
+
+		// Get and display data
+		const jsonString = e.target.response;
+		const json = JSON.parse(jsonString);
+		
+
+		// Add second year variables 
+		// If region currently selected
+		if (size == "region"){
+			for (let i = 0; i < region.length; i++){
+				for (let j = 0; j < json.length; j++){
+						
+					if (region.options[i].text == json[j][0])
+						dateRange.push(json[j][1]);
+				}		
+			}
+		}
+		// If state currently selected
+		else if (size == "state"){
+			for (let i = 0; i < state.length; i++){
+				for (let j = 0; j < json.length; j++){
+						
+					if (state.options[i].text == json[j][0])
+						dateRange.push(json[j][1]);
+				}		
+			}
+		}
+		// If county currently selected
+		else if (size == "county"){
+			for (let i = 0; i < county.length; i++){
+				for (let j = 0; j < json.length; j++){
+					// Split
+					let contain = json[j][0].split(", ");
+					// Some counties have the same name
+					if (county.options[i].label == contain[0] && county.options[i].text == contain[1])
+						dateRange.push(json[j][1]);
+				}		
+			}
+		}
+	};
+			
+	// Open the connection using the HTTP GET method
+	xhr.open("GET",url);
+	
+	// Send request
+	xhr.send();	
+		
+}
+
+
 function clearSelect(scale){
 	// Delete all but first element (blank)
 	let length = scale.length;
@@ -383,6 +454,7 @@ function resetMap(){
 		features: []
 	};
 }
+
 
 
 export {init};

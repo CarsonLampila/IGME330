@@ -158,25 +158,57 @@ function makeGeoJSON(){
 }
 
 
-function addMarker(geojson){
+function addMarker(geojson, dateRange){
+	
+	let i = 0;
 	
 	// add markers to map
 	for (let feature of geojson.features) {
 		
 		// create a HTML element for each feature
 		let el = document.createElement('div');
-		el.className = 'marker';
+		el.className = 'marker';	
 
 		// make a marker for each feature and add to the map
 		let marker = new mapboxgl.Marker(el)
 			.setLngLat(feature.geometry.coordinates)
 			.setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
-			.setHTML('<h3>' + feature.properties.title + '</h3><p>' + feature.properties.description + '</p>'))
+			.setHTML(contentGenerator(feature, dateRange[i])))
 			.addTo(map);
 			
 		markers.push(marker);
+		
+		// Interval
+		i++;
 	};
 }
+
+
+function contentGenerator(feat, start){
+	
+	let content;
+	
+	// If years are the same ignore
+	if (startYearSelect.value == endYearSelect.value){
+		content = '<h3>' + feat.properties.title + '</h3><p>Number of Households with ' + dataType.options[dataType.selectedIndex].text + '</p><p>' + endYearSelect.value + ": " +
+					feat.properties.description + '</p>';
+	}
+	else{
+		// Find Growth/Loss rates
+		let math = Math.round((100 - ((start / feat.properties.description) * 100)) * 100) / 100;
+		let pos;
+		if (math > 0)
+			pos = "% growth";
+		else
+			pos = "% loss";
+		
+		content = '<h3>' + feat.properties.title + '</h3><p>Number of Households with ' + dataType.options[dataType.selectedIndex].text + '</p><p>' + startYearSelect.value + ": " + start + 
+					'</p><p>' + endYearSelect.value + ": " + feat.properties.description + '</p><p>' + math + pos;
+	}
+	
+	return content;
+}
+
 
 
 function removeAllMarkers(){
