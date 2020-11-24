@@ -2,7 +2,6 @@ let map
 let markers = [];
 let names = [];
 let coors = [];
-let des = [];
 
 function initMap(){
 	mapboxgl.accessToken = 'pk.eyJ1IjoiY2VsMTM2OSIsImEiOiJja2hmNzYyZDQwb2ExMnpwNXdwaWJyOHllIn0.FPJLn2H_xaYcX9VRMEpoUA';
@@ -106,9 +105,6 @@ function calcMarkers(scale, div){
 				}
 			else
 				coors.push([+json.features[0].geometry.coordinates[0], +json.features[0].geometry.coordinates[1]]);
-						
-			
-			des.push(scale.options[i].value);
 		};
 			
 		// Open the connection using the HTTP GET method
@@ -120,7 +116,7 @@ function calcMarkers(scale, div){
 }
 
 
-function makeGeoJSON(){
+function makeGeoJSON(start, end){
 	// 1 - our "starter" 'FeatureCollection' object we will be returning
 	let geojson = {type: 'FeatureCollection', features: [] };
 
@@ -136,7 +132,8 @@ function makeGeoJSON(){
 			},
 			properties: {
 				title: '',
-				description: 'None'
+				start: 0,
+				end : 0
 			}
 		};
 		
@@ -148,7 +145,8 @@ function makeGeoJSON(){
 		newFeature.properties.title = names[i];
 		
 		// 8 - initialize `.properties.description`
-		newFeature.properties.description = des[i];
+		newFeature.properties.start = start[i];
+		newFeature.properties.end = end[i];
 		
 		// 9 - add the new feature to the array
 		geojson.features.push(newFeature);
@@ -158,7 +156,7 @@ function makeGeoJSON(){
 }
 
 
-function addMarker(geojson, dateRange){
+function addMarker(geojson){
 	
 	let i = 0;
 	
@@ -173,7 +171,7 @@ function addMarker(geojson, dateRange){
 		let marker = new mapboxgl.Marker(el)
 			.setLngLat(feature.geometry.coordinates)
 			.setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
-			.setHTML(contentGenerator(feature, dateRange[i])))
+			.setHTML(contentGenerator(feature)))
 			.addTo(map);
 			
 		markers.push(marker);
@@ -184,26 +182,26 @@ function addMarker(geojson, dateRange){
 }
 
 
-function contentGenerator(feat, start){
+function contentGenerator(feat){
 	
 	let content;
 	
 	// If years are the same ignore
 	if (startYearSelect.value == endYearSelect.value){
-		content = '<h3>' + feat.properties.title + '</h3><p>Number of Households with ' + dataType.options[dataType.selectedIndex].text + '</p><p>' + endYearSelect.value + ": " +
-					feat.properties.description + '</p>';
+		content = '<h3>' + feat.properties.title + '</h3><p>Number of Households with ' + dataType.options[dataType.selectedIndex].label + '</p><p>' + endYearSelect.value + ": " +
+					feat.properties.end + '</p>';
 	}
 	else{
 		// Find Growth/Loss rates
-		let math = Math.round((100 - ((start / feat.properties.description) * 100)) * 100) / 100;
+		let math = Math.round((100 - ((feat.properties.start / feat.properties.end) * 100)) * 100) / 100;
 		let pos;
 		if (math > 0)
 			pos = "% growth";
 		else
 			pos = "% loss";
 		
-		content = '<h3>' + feat.properties.title + '</h3><p>Number of Households with ' + dataType.options[dataType.selectedIndex].text + '</p><p>' + startYearSelect.value + ": " + start + 
-					'</p><p>' + endYearSelect.value + ": " + feat.properties.description + '</p><p>' + math + pos;
+		content = '<h3>' + feat.properties.title + '</h3><p>Number of Households with ' + dataType.options[dataType.selectedIndex].label + '</p><p>' + startYearSelect.value + ": " + feat.properties.start + 
+					'</p><p>' + endYearSelect.value + ": " + feat.properties.end + '</p><p>' + math + pos;
 	}
 	
 	return content;
@@ -219,7 +217,6 @@ function removeAllMarkers(){
 	markers = [];
 	names = [];
 	coors = [];
-	des = [];
 }
 
 

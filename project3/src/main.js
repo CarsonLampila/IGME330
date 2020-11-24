@@ -2,7 +2,8 @@ import * as maps from "./map.js";
 
 let dates;
 let index;
-let dateRange = [];
+let startRange = [];
+let endRange = [];
 
 
 let geojson = {
@@ -21,8 +22,8 @@ function setupUI(){
 	startYearSelect.onchange = (e) => {	
 		// Reload with new data	
 		if (dataType.value != 0){
-			dateRange = [];
-			rangeLoad();
+			startRange = [];
+			rangeLoad(startYearSelect.value, true);
 		}
 	}
 	
@@ -30,23 +31,27 @@ function setupUI(){
 	endYearSelect.onchange = (e) => {	
 		// Reload with new data	
 		if (dataType.value != 0){
-			reload();	
-			rangeLoad();
+			endRange = [];
+			rangeLoad(endYearSelect.value, false);
 		}
 	}
 		
 		
 	dataType.onchange = (e) => {
-		// Reload with new data
 		
-		if (region.length > 1){
-			reload();	
-			rangeLoad();
-		}
-		else{
-			loadURLData(e);
-		}
-
+		console.log("difs");
+		
+		
+		clearSelect(region);
+		clearSelect(state);
+		clearSelect(county);
+		
+		createDropDown(e);
+		
+		startRange = [];
+		endRange = [];
+		rangeLoad(startYearSelect.value, true);
+		rangeLoad(endYearSelect.value, false);
 	}
 	
 	
@@ -55,7 +60,12 @@ function setupUI(){
 		clearSelect(state);
 		clearSelect(county);
 		// Reload
-		loadURLData(e);
+		createDropDown(e);
+		
+		startRange = [];
+		endRange = [];
+		rangeLoad(startYearSelect.value, true);
+		rangeLoad(endYearSelect.value, false);
 	}
 	
 	
@@ -63,13 +73,20 @@ function setupUI(){
 		// Clear
 		clearSelect(county);
 		// Reload
-		loadURLData(e);
+		createDropDown(e);
+		
+		startRange = [];
+		endRange = [];
+		rangeLoad(startYearSelect.value, true);
+		rangeLoad(endYearSelect.value, false);
 	}
 	
 	
 	county.onchange = (e) => {
-		// Reload
-		loadURLData(e);
+		startRange = [];
+		endRange = [];
+		rangeLoad(startYearSelect.value, true);
+		rangeLoad(endYearSelect.value, false);
 	}
 	
 		
@@ -101,8 +118,8 @@ function setupUI(){
 
 		// Allow time to process
 		setTimeout(function(){ 
-			geojson = maps.makeGeoJSON(); 
-			maps.addMarker(geojson, dateRange);
+			geojson = maps.makeGeoJSON(startRange, endRange); 
+			maps.addMarker(geojson,);
 		}, 1000);
 
 		
@@ -114,7 +131,7 @@ function setupUI(){
 	resetBtn.onclick = e => {
 		// Move Selects
 		endYearSelect.options[0].selected = true;
-		startYearSelect.options[1].selected = true;
+		startYearSelect.options[0].selected = true;
 		dataType.options[0].selected = true;
 		// Clear Dropdowns
 		clearSelect(region);
@@ -126,7 +143,7 @@ function setupUI(){
 }
 
 
-function loadURLData(e){
+function createDropDown(e){
 			
 	// Make URL
 	const xhr = new XMLHttpRequest();
@@ -153,13 +170,13 @@ function loadURLData(e){
 
 		// Create region dropdown
 		if (size == "region")
-			createDropDown(json, region, size);	
+			selectOptions(json, region, size);	
 		// Create state dropdown
 		if (size == "state")
-			createDropDown(json, state, size, region.options[region.selectedIndex].text);
+			selectOptions(json, state, size, region.options[region.selectedIndex].text);
 		// Create county dropdown
 		if (size == "county")
-			createDropDown(json, county, size, state.options[state.selectedIndex].text);
+			selectOptions(json, county, size, state.options[state.selectedIndex].text);
 	};
 			
 	// Open the connection using the HTTP GET method
@@ -170,7 +187,7 @@ function loadURLData(e){
 }
 
 
-function createDropDown(json, scale, size, area = "none"){
+function selectOptions(json, scale, size, area = "none"){
 	
 	// Variables
 	let order = 1;	
@@ -193,7 +210,7 @@ function createDropDown(json, scale, size, area = "none"){
 					// Add select option
 					let newOption = document.createElement("option");
 					newOption.text = json[j][0];
-					newOption.value = json[j][1];						
+					//newOption.value = json[j][1];						
 					scale.add(newOption);				
 								
 					// Next + Exit
@@ -266,7 +283,7 @@ function createDropDown(json, scale, size, area = "none"){
 				
 				let newOption = document.createElement("option");
 				newOption.text = json[i][0];
-				newOption.value = json[i][1];				
+				//newOption.value = json[i][1];				
 				scale.add(newOption);
 				
 				i = 0;
@@ -283,36 +300,62 @@ function createDropDown(json, scale, size, area = "none"){
 			if (area == contain[1]){	
 				let newOption = document.createElement("option");
 				newOption.text = contain[1];
-				newOption.value = json[i][1];
+				//newOption.value = json[i][1];
 				newOption.label = contain[0];		
 				scale.add(newOption);
 			}				
 		}
 	}
 }
-	
 
-function reload(){
+
+function rangeLoad(year, isStart){
 	
-	// Loop for each dropdown
-	for (let i = 0; i < 3; i++){
+	// Define
+	let loop = 0;
+	let search = [];
+	let divs = [];
+	
+	// Find size
+	let size = "region";
+	if (region.value != 0)
+		size = "state";	
+	if (state.value != 0)
+		size = "county";
+		
+	// If older data set
+	if (year < 2015){
+		// Regular
+		if (+dataType.options[dataType.selectedIndex].text < 100){
+			loop = 1;
+			search.push(dataType.options[dataType.selectedIndex].text);
+		}
+		// Cellular
+		else if (+dataType.options[dataType.selectedIndex].text == 101){
+			loop = 4;
+			search = ["005", "008", "011", "014"];
+		}
+		// Broadband
+		else if (+dataType.options[dataType.selectedIndex].text == 102){
+			loop = 3;
+			search = ["004", "007", "010"];
+		}
+	}
+	// Newer data set
+	else{
+		loop = 1;
+		search.push(dataType.options[dataType.selectedIndex].value);
+	}
+		
+	// Loop to hit all urls
+	for (let i = 0; i < loop; i++){
 		
 		// Make URL
-		const xhr = new XMLHttpRequest();
-		
-		let size;
-		
-		if (i == 0)
-			size = "region";
-		else if (i == 1)
-			size = "state";
-		else
-			size = "county";
-			
+		const xhr = new XMLHttpRequest();	
 		const key = "27b8b7f546e9bb3da4d5c38c3c3f784e09b51f5d";
-		const url = "https://api.census.gov/data/" + endYearSelect.value + "/acs/acs1?get=NAME,B28002_" + dataType.value + "E&for=" + size + ":*&key=" + key;
-			
+		const url = "https://api.census.gov/data/" + year + "/acs/acs1?get=NAME,B28002_" + search[i] + "E&for=" + size + ":*&key=" + key;
 		
+			
 		// `onerror` error
 		xhr.onerror = (e) => console.log("error");
 			
@@ -322,36 +365,36 @@ function reload(){
 			// Get and display data
 			const jsonString = e.target.response;
 			const json = JSON.parse(jsonString);
+		
 
-			// Update region values
+			// Add all relevant data to a seperate array
+			// If region currently selected
 			if (size == "region"){
-				for (let i = 0; i < region.length; i++){
-					for (let j = 0; j < json.length; j++){
-						
-						if (region.options[i].text == json[j][0])
-							region.options[i].value = json[j][1];
+				for (let j = 0; j < region.length; j++){
+					for (let k = 0; k < json.length; k++){					
+						if (region.options[j].text == json[k][0])				
+							divs.push([region.options[j].text, json[k][1]]);										
 					}		
 				}
 			}
-			// Update state values
-			if (size == "state"){
-				for (let i = 0; i < state.length; i++){
-					for (let j = 0; j < json.length; j++){
-						
-						if (state.options[i].text == json[j][0])
-							state.options[i].value = json[j][1];
+			// If state currently selected
+			else if (size == "state"){
+				for (let j = 0; j < state.length; j++){
+					for (let k = 0; k < json.length; k++){				
+						if (state.options[j].text == json[k][0])
+							divs.push([state.options[j].text, json[k][1]]);					
 					}		
 				}
 			}
-			// Update county values
-			if (size == "county"){
-				for (let i = 0; i < county.length; i++){
-					for (let j = 0; j < json.length; j++){
+			// If county currently selected
+			else if (size == "county"){
+				for (let j = 0; j < county.length; j++){
+					for (let k = 0; k < json.length; k++){
 						// Split
-						let contain = json[j][0].split(", ");
+						let contain = json[k][0].split(", ");
 						// Some counties have the same name
-						if (county.options[i].label == contain[0] && county.options[i].text == contain[1])
-							county.options[i].value = json[j][1];
+						if (county.options[j].label == contain[0] && county.options[j].text == contain[1])
+							divs.push([county.options[j].label, json[k][1]]);		
 					}		
 				}
 			}
@@ -361,80 +404,62 @@ function reload(){
 		xhr.open("GET",url);
 	
 		// Send request
-		xhr.send();			
+		xhr.send();
 	}	
+	
+	
+	// Process array data
+	setTimeout(function(){totals(size, divs, isStart);}, 1500);
 }
 
 
-function rangeLoad(){
+function totals(size, divs, isStart){
 	
-		
-	// Make URL
-	const xhr = new XMLHttpRequest();
-		
-	let size = "region";
-	if (region.value != 0)
-		size = "state";	
-	if (state.value != 0)
-		size = "county";
-
-			
-	const key = "27b8b7f546e9bb3da4d5c38c3c3f784e09b51f5d";
-	const url = "https://api.census.gov/data/" + startYearSelect.value + "/acs/acs1?get=NAME,B28002_" + dataType.value + "E&for=" + size + ":*&key=" + key;
-			
-		
-	// `onerror` error
-	xhr.onerror = (e) => console.log("error");
-			
-	// `onload` handler
-	xhr.onload = (e) => {	
-
-		// Get and display data
-		const jsonString = e.target.response;
-		const json = JSON.parse(jsonString);
-		
-
-		// Add second year variables 
-		// If region currently selected
-		if (size == "region"){
-			for (let i = 0; i < region.length; i++){
-				for (let j = 0; j < json.length; j++){
-						
-					if (region.options[i].text == json[j][0])
-						dateRange.push(json[j][1]);
-				}		
-			}
-		}
-		// If state currently selected
-		else if (size == "state"){
-			for (let i = 0; i < state.length; i++){
-				for (let j = 0; j < json.length; j++){
-						
-					if (state.options[i].text == json[j][0])
-						dateRange.push(json[j][1]);
-				}		
-			}
-		}
-		// If county currently selected
-		else if (size == "county"){
-			for (let i = 0; i < county.length; i++){
-				for (let j = 0; j < json.length; j++){
-					// Split
-					let contain = json[j][0].split(", ");
-					// Some counties have the same name
-					if (county.options[i].label == contain[0] && county.options[i].text == contain[1])
-						dateRange.push(json[j][1]);
-				}		
-			}
-		}
-	};
-			
-	// Open the connection using the HTTP GET method
-	xhr.open("GET",url);
+	let total;
 	
-	// Send request
-	xhr.send();	
-		
+	// Add all data of same area together
+	// If region currently selected
+	if (size == "region"){
+		for (let i = 1; i < region.length; i++){	
+			total = 0;	
+			for (let j = 0; j < divs.length; j++){
+				if (region.options[i].text == divs[j][0])
+					total += (+divs[j][1]);
+			}
+			if (isStart)
+				startRange.push(total);
+			else
+				endRange.push(total);
+		}
+	}
+	// If state currently selected
+	else if (size == "state"){
+		for (let i = 1; i < state.length; i++){
+			total = 0;
+			for (let j = 0; j < divs.length; j++){
+				if (state.options[i].text == divs[j][0])
+					total += (+divs[j][1]);		
+			}
+			if (isStart)
+				startRange.push(total);
+			else
+				endRange.push(total);
+		}
+	}
+	// If county currently selected
+	else if (size == "county"){
+		for (let i = 1; i < county.length; i++){	
+			total = 0;		
+			for (let j = 0; j < divs.length; j++){
+				if (county.options[i].label == divs[j][0])
+					total += (+divs[j][1]);
+			}	
+			if (isStart)
+				startRange.push(total);
+			else
+				endRange.push(total);
+		}
+	}
 }
 
 
