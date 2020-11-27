@@ -10,6 +10,7 @@ class Marker{
 	}
 	
 	
+	// Make map marker
 	addMarker(){
 		// create a HTML element for each feature
 		let el = document.createElement('div');
@@ -27,6 +28,7 @@ class Marker{
 	}
 	
 	
+	// Make content for markers
 	contentGenerator(){
 	
 		let content;

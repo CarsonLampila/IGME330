@@ -6,8 +6,13 @@ let map
 let markers = [];
 let names = [];
 let coors = [];
+let a = [];
+let b = [];
+let c = [];
+let d = [];
 
 
+// Generate map
 function initMap(){
 	
 	// Create map
@@ -22,6 +27,7 @@ function initMap(){
 }
 
 
+// Calc the contents for each marker
 function calcMarkers(scale, div, start, end, startTotal, endTotal){
 	
 	// Define 
@@ -120,13 +126,17 @@ function calcMarkers(scale, div, start, end, startTotal, endTotal){
 			// If pushed here name will always match with coords but not always with data	
 			// Add marker vars
 			names.push(area);
+			a.push(start[i - 1]);
+			b.push(end[i - 1]);
+			c.push(startTotal[i - 1]);
+			d.push(endTotal[i - 1]);
 				
 				
 			// If last time through the loop
 			if (i == scale.length - 1){
 				// Allow time to load
 				setTimeout(function(){ 
-					createMarkers(start, end, startTotal, endTotal);
+					createMarkers(a, b, c, d);
 				}, 2000);
 			}
 			
@@ -141,6 +151,7 @@ function calcMarkers(scale, div, start, end, startTotal, endTotal){
 }
 
 
+// Using data generate map markers
 function createMarkers(start, end, startTotals, endTotals){
 
 	// Loop for length
@@ -156,6 +167,7 @@ function createMarkers(start, end, startTotals, endTotals){
 }
 
 
+// Clean all markers
 function removeAllMarkers(){
 
 	// Remove and clean all
@@ -165,7 +177,12 @@ function removeAllMarkers(){
 	markers = [];
 	names = [];
 	coors = [];
+	a = [];
+	b = [];
+	c = [];
+	d = [];
 }
+
 
 
 export {markers, initMap, calcMarkers, createMarkers, removeAllMarkers};

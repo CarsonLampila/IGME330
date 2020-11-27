@@ -10,6 +10,7 @@ let allEndHouseholds = [];
 let prevData = 0;
 
 
+// Startup
 function init(){
 	
 	// Create Map
@@ -23,6 +24,7 @@ function init(){
 }
 
 
+// Setup Controls
 function setupUI(){
 		
 	// Data Type Change
@@ -135,6 +137,7 @@ function setupUI(){
 }
 
 
+// Create the Drop Down Contents
 function createDropDown(){
 			
 	// Make URL
@@ -175,6 +178,7 @@ function createDropDown(){
 }
 
 
+// Organize the drop downs
 function selectOptions(json, scale, size, area = "none"){
 	
 	// Variables
@@ -291,6 +295,7 @@ function selectOptions(json, scale, size, area = "none"){
 }
 
 
+// Search the API to fill arrays corsponding to the currently selected drop downs
 function loadURLdata(year, arrNum){
 	
 	// Define
@@ -424,6 +429,7 @@ function loadURLdata(year, arrNum){
 }
 
 
+// Save last searched values 
 function saveLast() {
 	// Save: Start Year, End Year, Data Type, Region Selection, State Selection, County Selection
 	let prev = [startYearSelect.selectedIndex, endYearSelect.selectedIndex, dataType.selectedIndex, region.selectedIndex, state.selectedIndex, county.selectedIndex]
@@ -431,6 +437,7 @@ function saveLast() {
 }
 
 
+// Apply all searched data
 function loadPrev(){
 	// Load previous searches
 	let prev = localStorage.getItem(savedTerm);
@@ -483,6 +490,7 @@ function loadPrev(){
 }
 
 
+// Find smallest level of selections
 function findSize(){
 	// Return sscale based on number of selections in  dropdowns
 	let size = "region";
@@ -495,6 +503,7 @@ function findSize(){
 }
 
 
+// Add input to corresponding arrays
 function addTo(arrNum, cur){
 	// Add to according array
 	switch(arrNum) {
@@ -517,6 +526,7 @@ function addTo(arrNum, cur){
 }
 
 
+// Calculate totals for calculating cell and broadband <= 2015   (different api data style)
 function totals(divs, scale, arrNum){
 	// Calc totals
 	let total;
@@ -530,6 +540,15 @@ function totals(divs, scale, arrNum){
 		}
 		// Add to correct array			
 		addTo(arrNum, total);
+	}
+}
+
+
+function clearSelect(scale){
+	// Delete all but first element (blank)
+	let length = scale.length;
+	for (let i = 0; i < length; i++){	
+		scale.options[length - i] = null
 	}
 }
 
