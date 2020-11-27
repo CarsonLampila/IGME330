@@ -6,10 +6,10 @@ let map
 let markers = [];
 let names = [];
 let coors = [];
-let a = [];
-let b = [];
-let c = [];
-let d = [];
+let orderS = [];
+let orderE = [];
+let orderST = [];
+let orderET = [];
 
 
 // Generate map
@@ -126,10 +126,10 @@ function calcMarkers(scale, div, start, end, startTotal, endTotal){
 			// If pushed here name will always match with coords but not always with data	
 			// Add marker vars
 			names.push(area);
-			a.push(start[i - 1]);
-			b.push(end[i - 1]);
-			c.push(startTotal[i - 1]);
-			d.push(endTotal[i - 1]);
+			orderS.push(start[i - 1]);
+			orderE.push(end[i - 1]);
+			orderST.push(startTotal[i - 1]);
+			orderET.push(endTotal[i - 1]);
 				
 				
 			// If last time through the loop
@@ -177,10 +177,10 @@ function removeAllMarkers(){
 	markers = [];
 	names = [];
 	coors = [];
-	a = [];
-	b = [];
-	c = [];
-	d = [];
+	orderS = [];
+	orderE = [];
+	orderST = [];
+	orderET = [];
 }
 
 
