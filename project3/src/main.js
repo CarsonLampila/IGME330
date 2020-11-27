@@ -1,160 +1,148 @@
 import * as maps from "./map.js";
 
-let dates;
-let index;
+// Define
+const savedTerm = "cel1369-prev"
+const key = "27b8b7f546e9bb3da4d5c38c3c3f784e09b51f5d";
 let startRange = [];
 let endRange = [];
+let allStartHouseholds = [];
+let allEndHouseholds = [];
+let prevData = 0;
 
-
-let geojson = {
-	type: 'FeatureCollection',
-	features: []
-};
 
 function init(){
+	
+	// Create Map
 	maps.initMap();	
+
+	// Load previous selections
+	loadPrev();
+	
+	// Activate buttons
 	setupUI();
 }
 
 
 function setupUI(){
-	
-	startYearSelect.onchange = (e) => {	
-		// Reload with new data	
-		if (dataType.value != 0){
-			startRange = [];
-			rangeLoad(startYearSelect.value, true);
+		
+	// Data Type Change
+	dataType.onchange = () => {
+		// If changed from "Select a Data Type"
+		if (prevData == 0){
+			// Load Region
+			createDropDown();
 		}
+		prevData = 1;
 	}
 	
 	
-	endYearSelect.onchange = (e) => {	
-		// Reload with new data	
-		if (dataType.value != 0){
-			endRange = [];
-			rangeLoad(endYearSelect.value, false);
-		}
-	}
-		
-		
-	dataType.onchange = (e) => {
-		
-		console.log("difs");
-		
-		
-		clearSelect(region);
-		clearSelect(state);
-		clearSelect(county);
-		
-		createDropDown(e);
-		
-		startRange = [];
-		endRange = [];
-		rangeLoad(startYearSelect.value, true);
-		rangeLoad(endYearSelect.value, false);
-	}
-	
-	
-	region.onchange = (e) => {
+	// Region Change
+	region.onchange = () => {
 		// Clear
 		clearSelect(state);
 		clearSelect(county);
-		// Reload
-		createDropDown(e);
-		
-		startRange = [];
-		endRange = [];
-		rangeLoad(startYearSelect.value, true);
-		rangeLoad(endYearSelect.value, false);
+		// Load State
+		createDropDown();
 	}
 	
-	
-	state.onchange = (e) => {
+	// State Change
+	state.onchange = () => {
 		// Clear
 		clearSelect(county);
-		// Reload
-		createDropDown(e);
-		
-		startRange = [];
-		endRange = [];
-		rangeLoad(startYearSelect.value, true);
-		rangeLoad(endYearSelect.value, false);
-	}
-	
-	
-	county.onchange = (e) => {
-		startRange = [];
-		endRange = [];
-		rangeLoad(startYearSelect.value, true);
-		rangeLoad(endYearSelect.value, false);
+		// Loud County
+		createDropDown();
 	}
 	
 		
-	// Search returns selected value
-	searchBtn.onclick = e => {
-				
-		console.log("search");
-			
-		
-		// Reset on Search
-		resetMap();	
-		
-		// Specific County
-		if (county.value != 0)
-			maps.calcMarkers(county, 1);
-		
-		// County
-		else if (state.value != 0)
-			maps.calcMarkers(county, 2);
-		
-		// State
-		else if (region.value != 0)
-			maps.calcMarkers(state, 3);
-			
-		// Region
-		else
-			maps.calcMarkers(region, 4);
-		
-
-		// Allow time to process
-		setTimeout(function(){ 
-			geojson = maps.makeGeoJSON(startRange, endRange); 
-			maps.addMarker(geojson,);
-		}, 1000);
-
+	// Load based on dropdown selections
+	searchBtn.onclick = () => {
 		
 		// Data type selected
 		if (dataType.value == 0)		
-			alert("Please Select a Data Type First!");
+			alert("Please Select a Data Type!");
+		else{
+			// Loading Icon
+			document.querySelector("#status").innerHTML = `<h3>Creating Map Points!</h3><img id="loading" src="images/spinner.gif" alt="loading"></img>`;
+		
+			// Preload
+			startRange = [];
+			endRange = [];
+			allStartHouseholds = [];
+			allEndHouseholds = [];		
+			loadURLdata(startYearSelect.value, 1);
+			loadURLdata(endYearSelect.value, 2);
+			loadURLdata(startYearSelect.value, 3);
+			loadURLdata(endYearSelect.value, 4);
+		
+			// Remove all map markers
+			maps.removeAllMarkers();
+			
+			// Wait for preload
+			setTimeout(function(){ 
+			
+				// Calc Markers
+				// Specific County
+				if (county.value != -1)
+					maps.calcMarkers(county, 1, startRange, endRange, allStartHouseholds, allEndHouseholds);
+		
+				// County
+				else if (state.value != -1)
+					maps.calcMarkers(county, 2, startRange, endRange, allStartHouseholds, allEndHouseholds);
+		
+				// State
+				else if (region.value != -1)
+					maps.calcMarkers(state, 3, startRange, endRange, allStartHouseholds, allEndHouseholds);
+			
+				// Region
+				else
+					maps.calcMarkers(region, 4, startRange, endRange, allStartHouseholds, allEndHouseholds);
+		
+
+				// Wait for maps to finish calc
+				setTimeout(function(){ 
+					// Remove Load Icon
+					document.querySelector("#status").innerHTML = "";
+					
+					// Save searches
+					saveLast();
+					
+				}, 2000);
+			}, 8000);
+		}
 	};
 	
-	resetBtn.onclick = e => {
-		// Move Selects
+	// Resets everything
+	resetBtn.onclick = () => {
+		// Delete data
+		startRange = [];
+		endRange = [];
+		allStartHouseholds = [];
+		allEndHouseholds = [];
+		// Move selects
 		endYearSelect.options[0].selected = true;
 		startYearSelect.options[0].selected = true;
 		dataType.options[0].selected = true;
+		prevData = 0;
 		// Clear Dropdowns
 		clearSelect(region);
 		clearSelect(state);
 		clearSelect(county);
-		// Reset Map
-		resetMap();
+		// Remove all map markers
+		maps.removeAllMarkers();
+		// Resets Saves
+		localStorage.clear();
 	};
 }
 
 
-function createDropDown(e){
+function createDropDown(){
 			
 	// Make URL
 	const xhr = new XMLHttpRequest();
-		
-	let size = "region";
-	if (region.value != 0)
-		size = "state";	
-	if (state.value != 0)
-		size = "county";
 			
-	const key = "27b8b7f546e9bb3da4d5c38c3c3f784e09b51f5d";
+	// Determine latest selection level
+	let size = findSize();
+			
 	const url = "https://api.census.gov/data/" + endYearSelect.value + "/acs/acs1?get=NAME,B28002_" + dataType.value + "E&for=" + size + ":*&key=" + key;
 		
 		
@@ -183,7 +171,7 @@ function createDropDown(e){
 	xhr.open("GET",url);
 	
 	// Send request
-	xhr.send();		
+	xhr.send();	
 }
 
 
@@ -210,7 +198,6 @@ function selectOptions(json, scale, size, area = "none"){
 					// Add select option
 					let newOption = document.createElement("option");
 					newOption.text = json[j][0];
-					//newOption.value = json[j][1];						
 					scale.add(newOption);				
 								
 					// Next + Exit
@@ -234,8 +221,7 @@ function selectOptions(json, scale, size, area = "none"){
 						json[i][0] == "New Hampshire" && prev == "Massachusetts" || json[i][0] == "New Jersey" && prev == "New Hampshire" || json[i][0] == "New York" && prev == "New Jersey" || 
 						json[i][0] == "Pennsylvania" && prev == "New York" || json[i][0] == "Rhode Island" && prev == "Pennsylvania" || json[i][0] ==  "Vermont" && prev == "Rhode Island"){
 									
-						add = true;
-						prev = json[i][0];				
+						add = true;		
 					}
 					break;
 				
@@ -247,7 +233,6 @@ function selectOptions(json, scale, size, area = "none"){
 						json[i][0] == "South Dakota" && prev == "Ohio" || json[i][0] == "Wisconsin" && prev == "South Dakota"){
 						
 						add = true;
-						prev = json[i][0];	
 					}
 					break;
 				
@@ -261,7 +246,6 @@ function selectOptions(json, scale, size, area = "none"){
 						json[i][0] == "Virginia" && prev == "Texas" || json[i][0] == "West Virginia" && prev == "Virginia"){
 						
 						add = true;
-						prev = json[i][0];
 					}
 					break;
 				
@@ -272,8 +256,7 @@ function selectOptions(json, scale, size, area = "none"){
 						json[i][0] == "New Mexico" && prev == "Nevada" || json[i][0] == "Oregon" && prev == "New Mexico" || json[i][0] == "Utah" && prev == "Oregon" || json[i][0] == "Washington" && prev == "Utah" || 
 						json[i][0] == "Wyoming" && prev == "Washington"){
 						
-						add = true;
-						prev = json[i][0];					
+						add = true;				
 					}
 					break;
 			}	
@@ -281,9 +264,9 @@ function selectOptions(json, scale, size, area = "none"){
 			// Add select option
 			if (add){
 				
+				prev = json[i][0];	
 				let newOption = document.createElement("option");
-				newOption.text = json[i][0];
-				//newOption.value = json[i][1];				
+				newOption.text = json[i][0];			
 				scale.add(newOption);
 				
 				i = 0;
@@ -300,8 +283,7 @@ function selectOptions(json, scale, size, area = "none"){
 			if (area == contain[1]){	
 				let newOption = document.createElement("option");
 				newOption.text = contain[1];
-				//newOption.value = json[i][1];
-				newOption.label = contain[0];		
+				newOption.label = contain[0];			
 				scale.add(newOption);
 			}				
 		}
@@ -309,53 +291,56 @@ function selectOptions(json, scale, size, area = "none"){
 }
 
 
-function rangeLoad(year, isStart){
+function loadURLdata(year, arrNum){
 	
 	// Define
 	let loop = 0;
 	let search = [];
 	let divs = [];
+
 	
 	// Find size
-	let size = "region";
-	if (region.value != 0)
-		size = "state";	
-	if (state.value != 0)
-		size = "county";
+	let size = findSize();
 		
-	// If older data set
-	if (year < 2015){
-		// Regular
-		if (+dataType.options[dataType.selectedIndex].text < 100){
-			loop = 1;
-			search.push(dataType.options[dataType.selectedIndex].text);
-		}
-		// Cellular
-		else if (+dataType.options[dataType.selectedIndex].text == 101){
-			loop = 4;
-			search = ["005", "008", "011", "014"];
-		}
-		// Broadband
-		else if (+dataType.options[dataType.selectedIndex].text == 102){
-			loop = 3;
-			search = ["004", "007", "010"];
-		}
-	}
-	// Newer data set
-	else{
+	// Getting totals
+	if (arrNum == 3 || arrNum == 4){
 		loop = 1;
-		search.push(dataType.options[dataType.selectedIndex].value);
+		search = ["001"];
 	}
-		
+	else{
+		// If older data set
+		if (year <= 2015){
+			// Regular
+			if (+dataType.options[dataType.selectedIndex].text < 100){
+				loop = 1;
+				search.push(dataType.options[dataType.selectedIndex].text);
+			}
+			// Cellular
+			else if (+dataType.options[dataType.selectedIndex].text == 101){
+				loop = 4;
+				search = ["005", "008", "011", "014"];
+			}
+			// Broadband
+			else if (+dataType.options[dataType.selectedIndex].text == 102){
+				loop = 3;
+				search = ["004", "007", "010"];
+			}
+		}
+		// Newer data set
+		else{
+			loop = 1;
+			search.push(dataType.options[dataType.selectedIndex].value);
+		}
+	}
+
 	// Loop to hit all urls
 	for (let i = 0; i < loop; i++){
 		
 		// Make URL
 		const xhr = new XMLHttpRequest();	
-		const key = "27b8b7f546e9bb3da4d5c38c3c3f784e09b51f5d";
 		const url = "https://api.census.gov/data/" + year + "/acs/acs1?get=NAME,B28002_" + search[i] + "E&for=" + size + ":*&key=" + key;
 		
-			
+
 		// `onerror` error
 		xhr.onerror = (e) => console.log("error");
 			
@@ -370,33 +355,63 @@ function rangeLoad(year, isStart){
 			// Add all relevant data to a seperate array
 			// If region currently selected
 			if (size == "region"){
+				// Match scale and json
 				for (let j = 0; j < region.length; j++){
 					for (let k = 0; k < json.length; k++){					
-						if (region.options[j].text == json[k][0])				
-							divs.push([region.options[j].text, json[k][1]]);										
+						if (region.options[j].text == json[k][0]){
+							// Regular Add
+							if (loop == 1)
+								addTo(arrNum, json[k][1]);
+							// Total Add
+							else{
+								divs.push([region.options[j].text, json[k][1]]);	
+								if (divs.length == ((region.length - 1) * loop))
+									totals(divs, region, arrNum);
+							}	
+						}
 					}		
 				}
 			}
 			// If state currently selected
 			else if (size == "state"){
+				// Match scale and json
 				for (let j = 0; j < state.length; j++){
 					for (let k = 0; k < json.length; k++){				
-						if (state.options[j].text == json[k][0])
-							divs.push([state.options[j].text, json[k][1]]);					
+						if (state.options[j].text == json[k][0]){
+							// Regular Add
+							if (loop == 1)
+								addTo(arrNum, json[k][1]);
+							// Total Add
+							else{
+								divs.push([state.options[j].text, json[k][1]]);	
+								if (divs.length == ((state.length - 1) * loop))
+									totals(divs, state, arrNum);
+							}	
+						}							
 					}		
 				}
 			}
 			// If county currently selected
 			else if (size == "county"){
+				// Match scale and json
 				for (let j = 0; j < county.length; j++){
 					for (let k = 0; k < json.length; k++){
 						// Split
 						let contain = json[k][0].split(", ");
 						// Some counties have the same name
-						if (county.options[j].label == contain[0] && county.options[j].text == contain[1])
-							divs.push([county.options[j].label, json[k][1]]);		
-					}		
-				}
+						if (county.options[j].label == contain[0] && county.options[j].text == contain[1]){
+							if (loop == 1)
+								// Regular Add
+								addTo(arrNum, json[k][1]);
+							// Total Add
+							else{
+								divs.push([county.options[j].label, json[k][1]]);	
+								if (divs.length == ((county.length - 1) * loop))
+									totals(divs, county, arrNum);
+							}								
+						}
+					}					
+				}		
 			}
 		};
 			
@@ -406,78 +421,116 @@ function rangeLoad(year, isStart){
 		// Send request
 		xhr.send();
 	}	
-	
-	
-	// Process array data
-	setTimeout(function(){totals(size, divs, isStart);}, 1500);
 }
 
 
-function totals(size, divs, isStart){
-	
+function saveLast() {
+	// Save: Start Year, End Year, Data Type, Region Selection, State Selection, County Selection
+	let prev = [startYearSelect.selectedIndex, endYearSelect.selectedIndex, dataType.selectedIndex, region.selectedIndex, state.selectedIndex, county.selectedIndex]
+    localStorage.setItem(savedTerm, prev)
+}
+
+
+function loadPrev(){
+	// Load previous searches
+	let prev = localStorage.getItem(savedTerm);
+	if (prev != null){
+		// Loading icon
+		document.querySelector("#status").innerHTML = `<h3>Loading Previous Data!</h3><img id="loading" src="images/spinner.gif" alt="loading"></img>`;
+		prev = prev.split(",");
+		// Set equal to previous
+		startYearSelect.options[prev[0]].selected = true;
+		endYearSelect.options[prev[1]].selected = true;
+		dataType.options[prev[2]].selected = true;
+		prevData = prev[2];
+		// Region
+		if (prev[2] != 0){
+			createDropDown();
+			// Allow dopdown to load
+			setTimeout(function(){ 
+				region.options[prev[3]].selected = true;
+				// State
+				if (prev[3] != 0){
+					createDropDown();
+					// Allow dopdown to load
+					setTimeout(function(){ 
+						state.options[prev[4]].selected = true;
+						// County
+						if (prev[4] != 0){
+							createDropDown();
+							// Allow dopdown to load
+							setTimeout(function(){ 
+								county.options[prev[5]].selected = true;	
+								// Remove Load Icon
+								document.querySelector("#status").innerHTML = "";
+
+							}, 1500);
+						}
+						else{
+							document.querySelector("#status").innerHTML = "";
+						}
+					}, 1500);
+				}
+				else{
+					document.querySelector("#status").innerHTML = "";		
+				}
+			}, 1500);
+		}
+		else{
+			document.querySelector("#status").innerHTML = "";
+		}
+	}
+}
+
+
+function findSize(){
+	// Return sscale based on number of selections in  dropdowns
+	let size = "region";
+	if (region.value != -1)
+		size = "state";	
+	if (state.value != -1)
+		size = "county";
+		
+	return size;
+}
+
+
+function addTo(arrNum, cur){
+	// Add to according array
+	switch(arrNum) {
+		case 1:
+			startRange.push(cur);
+			break;
+					
+		case 2:
+			endRange.push(cur);
+			break;
+					
+		case 3:
+			allStartHouseholds.push(cur);
+			break;
+					
+		case 4:
+			allEndHouseholds.push(cur);
+			break;
+	}
+}
+
+
+function totals(divs, scale, arrNum){
+	// Calc totals
 	let total;
-	
-	// Add all data of same area together
-	// If region currently selected
-	if (size == "region"){
-		for (let i = 1; i < region.length; i++){	
-			total = 0;	
-			for (let j = 0; j < divs.length; j++){
-				if (region.options[i].text == divs[j][0])
-					total += (+divs[j][1]);
-			}
-			if (isStart)
-				startRange.push(total);
-			else
-				endRange.push(total);
+	for (let i = 1; i < scale.length; i++){	
+		total = 0;		
+		// Calc total for each scale
+		for (let j = 0; j < divs.length; j++){
+
+			if (scale.options[i].label == divs[j][0])
+				total += (+divs[j][1]);
 		}
+		// Add to correct array			
+		addTo(arrNum, total);
 	}
-	// If state currently selected
-	else if (size == "state"){
-		for (let i = 1; i < state.length; i++){
-			total = 0;
-			for (let j = 0; j < divs.length; j++){
-				if (state.options[i].text == divs[j][0])
-					total += (+divs[j][1]);		
-			}
-			if (isStart)
-				startRange.push(total);
-			else
-				endRange.push(total);
-		}
-	}
-	// If county currently selected
-	else if (size == "county"){
-		for (let i = 1; i < county.length; i++){	
-			total = 0;		
-			for (let j = 0; j < divs.length; j++){
-				if (county.options[i].label == divs[j][0])
-					total += (+divs[j][1]);
-			}	
-			if (isStart)
-				startRange.push(total);
-			else
-				endRange.push(total);
-		}
-	}
-}
-
-
-function clearSelect(scale){
-	// Delete all but first element (blank)
-	let length = scale.length;
-	for (let i = 0; i < length; i++){	
-		scale.options[length - i] = null
-	}
-}
-
-
-function resetMap(){
-	maps.removeAllMarkers();
-	geojson = {
-		type: 'FeatureCollection',
-		features: []
-	};
 }
 
 

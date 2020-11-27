@@ -1,10 +1,17 @@
+import * as classes from "./classes.js";
+
+// Define
+const key = "pk.eyJ1IjoiY2VsMTM2OSIsImEiOiJja2hmNzYyZDQwb2ExMnpwNXdwaWJyOHllIn0.FPJLn2H_xaYcX9VRMEpoUA";
 let map
 let markers = [];
 let names = [];
 let coors = [];
 
+
 function initMap(){
-	mapboxgl.accessToken = 'pk.eyJ1IjoiY2VsMTM2OSIsImEiOiJja2hmNzYyZDQwb2ExMnpwNXdwaWJyOHllIn0.FPJLn2H_xaYcX9VRMEpoUA';
+	
+	// Create map
+	mapboxgl.accessToken = key;
 
 	map = new mapboxgl.Map({
 		container: 'map',
@@ -12,17 +19,16 @@ function initMap(){
 		center: [-96, 37.8],
 		zoom: 3
 	});
-	
-	return map;
 }
 
 
-function calcMarkers(scale, div){
+function calcMarkers(scale, div, start, end, startTotal, endTotal){
 	
 	// Define 
 	let repeat = false;
 
-	// loop through drop down
+
+	// Loop through drop down
 	for (let i = 1; i < scale.length; i++){
 		
 		// Define
@@ -31,7 +37,6 @@ function calcMarkers(scale, div){
 		
 		// Generate URL
 		const xhr = new XMLHttpRequest();
-		const key = "pk.eyJ1IjoiY2VsMTM2OSIsImEiOiJja2hmNzYyZDQwb2ExMnpwNXdwaWJyOHllIn0.FPJLn2H_xaYcX9VRMEpoUA";
 		
 		
 		switch(div){
@@ -60,12 +65,18 @@ function calcMarkers(scale, div){
 			case 4:
 				area = scale.options[i].text;
 				searchArea = area;
-				break;		
+				break;	
 		}
 		
+		/*
+		// If pushed here name will always match data not always with coords
+		// Add marker vars
+		names.push(area);
+		*/
+			
 		const url = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + searchArea + ".json?access_token=" + key;
-		
-		
+
+	
 		// `onerror` error
 		xhr.onerror = (e) => console.log("error");
 			
@@ -75,13 +86,10 @@ function calcMarkers(scale, div){
 			// Get and display data
 			const jsonString = e.target.response;
 			const json = JSON.parse(jsonString);
-	
-			// Add marker vars
-			names.push(area);
-			
+
 			
 			// Region hard code due to lack of available api coords
-			if (div == 4)
+			if (div == 4){
 				switch(i){
 					// NE
 					case 1:
@@ -103,8 +111,25 @@ function calcMarkers(scale, div){
 						coors.push([-113.1809, 41.1388]);
 						break;
 				}
+			}
+			// Add searched coords
 			else
 				coors.push([+json.features[0].geometry.coordinates[0], +json.features[0].geometry.coordinates[1]]);
+				
+				
+			// If pushed here name will always match with coords but not always with data	
+			// Add marker vars
+			names.push(area);
+				
+				
+			// If last time through the loop
+			if (i == scale.length - 1){
+				// Allow time to load
+				setTimeout(function(){ 
+					createMarkers(start, end, startTotal, endTotal);
+				}, 2000);
+			}
+			
 		};
 			
 		// Open the connection using the HTTP GET method
@@ -112,105 +137,28 @@ function calcMarkers(scale, div){
 	
 		// Send request
 		xhr.send();	
-	}
+	}	
 }
 
 
-function makeGeoJSON(start, end){
-	// 1 - our "starter" 'FeatureCollection' object we will be returning
-	let geojson = {type: 'FeatureCollection', features: [] };
+function createMarkers(start, end, startTotals, endTotals){
 
-	// 2 - loop through all the regions
+	// Loop for length
 	for (let i = 0; i < names.length; i++){
-		
-		// 3 - Here's am "empty" GeoJSON "feature"
-		const newFeature = {
-			type: 'Feature',
-			geometry: {
-				type: 'Point',
-				coordinates: []
-			},
-			properties: {
-				title: '',
-				start: 0,
-				end : 0
-			}
-		};
-		
-		// 4 - initialize `.geometry.coordinates`		
-		newFeature.geometry.coordinates = [coors[i][0], coors[i][1]];
-		
-		// 5 - initialize `.properties.title` - and do so differently based on
-		// whether or not the region has a `.provinceOrState` property
-		newFeature.properties.title = names[i];
-		
-		// 8 - initialize `.properties.description`
-		newFeature.properties.start = start[i];
-		newFeature.properties.end = end[i];
-		
-		// 9 - add the new feature to the array
-		geojson.features.push(newFeature);
+
+		// Create a marker
+		let current = new classes.Marker([coors[i][0], coors[i][1]], names[i], start[i], end[i], startTotals[i], endTotals[i]);
+		// Add to map
+		let temp = current.addMarker();
+		temp.addTo(map);
+		markers.push(temp);
 	}
-	
-	return geojson;
 }
-
-
-function addMarker(geojson){
-	
-	let i = 0;
-	
-	// add markers to map
-	for (let feature of geojson.features) {
-		
-		// create a HTML element for each feature
-		let el = document.createElement('div');
-		el.className = 'marker';	
-
-		// make a marker for each feature and add to the map
-		let marker = new mapboxgl.Marker(el)
-			.setLngLat(feature.geometry.coordinates)
-			.setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
-			.setHTML(contentGenerator(feature)))
-			.addTo(map);
-			
-		markers.push(marker);
-		
-		// Interval
-		i++;
-	};
-}
-
-
-function contentGenerator(feat){
-	
-	let content;
-	
-	// If years are the same ignore
-	if (startYearSelect.value == endYearSelect.value){
-		content = '<h3>' + feat.properties.title + '</h3><p>Number of Households with ' + dataType.options[dataType.selectedIndex].label + '</p><p>' + endYearSelect.value + ": " +
-					feat.properties.end + '</p>';
-	}
-	else{
-		// Find Growth/Loss rates
-		let math = Math.round((100 - ((feat.properties.start / feat.properties.end) * 100)) * 100) / 100;
-		let pos;
-		if (math > 0)
-			pos = "% growth";
-		else
-			pos = "% loss";
-		
-		content = '<h3>' + feat.properties.title + '</h3><p>Number of Households with ' + dataType.options[dataType.selectedIndex].label + '</p><p>' + startYearSelect.value + ": " + feat.properties.start + 
-					'</p><p>' + endYearSelect.value + ": " + feat.properties.end + '</p><p>' + math + pos;
-	}
-	
-	return content;
-}
-
 
 
 function removeAllMarkers(){
 
+	// Remove and clean all
 	for(let m of markers){
 		m.remove();
 	}
@@ -220,4 +168,4 @@ function removeAllMarkers(){
 }
 
 
-export {initMap, calcMarkers,  makeGeoJSON, addMarker, removeAllMarkers};
+export {markers, initMap, calcMarkers, createMarkers, removeAllMarkers};

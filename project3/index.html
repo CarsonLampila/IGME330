@@ -35,7 +35,6 @@
 	</select>
 	<select id="dataType">
 		<option label="Select a Data Type!" value="000" selected>000</option>
-		<option label="Total Households:" value="001">001</option>
 		<option label="An Internet subscription:" value="002">002</option>
 		<option label="Dial-up alone:" value="003">003</option>
 		<option label="Cellular data plan:" value="005">101</option>
@@ -45,16 +44,17 @@
 		<option label="No Internet access:" value="013">021</option>
 	</select>
 	<select id="region">
-		<option value="00" selected>Select a Region!</option>
+		<option value="-1" selected>Select a Region!</option>
 	</select>
 	<select id="state">
-		<option value="00" selected>Select a State!</option>
+		<option value="-1" selected>Select a State!</option>
 	</select>
 	<select id="county">
-		<option value="00" selected>Select a County!</option>
+		<option value="-1" selected>Select a County!</option>
 	</select>
 	<button id="searchBtn">Search</button>
 	<button id="resetBtn">Reset</button>
+	<div id="status"></div>
 </div>
 
 </body>
