@@ -18,7 +18,7 @@ function init(){
 
 	// Load previous selections
 	loadPrev();
-	
+		
 	// Activate buttons
 	setupUI();
 }
@@ -58,59 +58,7 @@ function setupUI(){
 		
 	// Load based on dropdown selections
 	searchBtn.onclick = () => {
-		
-		// Data type selected
-		if (dataType.value == 0)		
-			alert("Please Select a Data Type!");
-		else{
-			// Loading Icon
-			document.querySelector("#status").innerHTML = `<h3>Creating Map Points!</h3><img id="loading" src="images/spinner.gif" alt="loading"></img>`;
-		
-			// Preload
-			startRange = [];
-			endRange = [];
-			allStartHouseholds = [];
-			allEndHouseholds = [];		
-			loadURLdata(startYearSelect.value, 1);
-			loadURLdata(endYearSelect.value, 2);
-			loadURLdata(startYearSelect.value, 3);
-			loadURLdata(endYearSelect.value, 4);
-		
-			// Remove all map markers
-			maps.removeAllMarkers();
-			
-			// Wait for preload
-			setTimeout(function(){ 
-			
-				// Calc Markers
-				// Specific County
-				if (county.value != -1)
-					maps.calcMarkers(county, 1, startRange, endRange, allStartHouseholds, allEndHouseholds);
-		
-				// County
-				else if (state.value != -1)
-					maps.calcMarkers(county, 2, startRange, endRange, allStartHouseholds, allEndHouseholds);
-		
-				// State
-				else if (region.value != -1)
-					maps.calcMarkers(state, 3, startRange, endRange, allStartHouseholds, allEndHouseholds);
-			
-				// Region
-				else
-					maps.calcMarkers(region, 4, startRange, endRange, allStartHouseholds, allEndHouseholds);
-		
-
-				// Wait for maps to finish calc
-				setTimeout(function(){ 
-					// Remove Load Icon
-					document.querySelector("#status").innerHTML = "";
-					
-					// Save searches
-					saveLast();
-					
-				}, 2000);
-			}, 8000);
-		}
+		search();
 	};
 	
 	// Resets everything
@@ -134,6 +82,64 @@ function setupUI(){
 		// Resets Saves
 		localStorage.clear();
 	};
+}
+
+
+function search(){
+	// Data type selected
+	if (dataType.value == 0)		
+		alert("Please Select a Data Type!");
+	else{
+		// Loading Icon
+		document.querySelector("#status").innerHTML = `<h2>Creating Map Points!</h2>`;
+		document.querySelector("#load").innerHTML = `<img id="loading" src="images/spinner.gif" alt="loading"></img>`;
+	
+		// Preload
+		startRange = [];
+		endRange = [];
+		allStartHouseholds = [];
+		allEndHouseholds = [];		
+		loadURLdata(startYearSelect.value, 1);
+		loadURLdata(endYearSelect.value, 2);
+		loadURLdata(startYearSelect.value, 3);
+		loadURLdata(endYearSelect.value, 4);
+		
+		// Remove all map markers
+		maps.removeAllMarkers();
+			
+		// Wait for preload
+		setTimeout(function(){ 
+			
+			// Calc Markers
+			// Specific County
+			if (county.value != -1)
+				maps.calcMarkers(county, 1, startRange, endRange, allStartHouseholds, allEndHouseholds);
+		
+			// County
+			else if (state.value != -1)
+				maps.calcMarkers(county, 2, startRange, endRange, allStartHouseholds, allEndHouseholds);
+		
+			// State
+			else if (region.value != -1)
+				maps.calcMarkers(state, 3, startRange, endRange, allStartHouseholds, allEndHouseholds);
+			
+			// Region
+			else
+				maps.calcMarkers(region, 4, startRange, endRange, allStartHouseholds, allEndHouseholds);
+		
+
+			// Wait for maps to finish calc
+			setTimeout(function(){ 
+				// Remove Load Icon
+				document.querySelector("#status").innerHTML = "";
+				document.querySelector("#load").innerHTML = "";
+					
+				// Save searches
+				saveLast();
+					
+			}, 2000);
+		}, 8000);
+	}
 }
 
 
@@ -443,7 +449,8 @@ function loadPrev(){
 	let prev = localStorage.getItem(savedTerm);
 	if (prev != null){
 		// Loading icon
-		document.querySelector("#status").innerHTML = `<h3>Loading Previous Data!</h3><img id="loading" src="images/spinner.gif" alt="loading"></img>`;
+		document.querySelector("#status").innerHTML = `<h2>Loading Previous Data!</h2>`;
+		document.querySelector("#load").innerHTML = `<img id="loading" src="images/spinner.gif" alt="loading"></img>`;
 		prev = prev.split(",");
 		// Set equal to previous
 		startYearSelect.options[prev[0]].selected = true;
@@ -470,21 +477,35 @@ function loadPrev(){
 								county.options[prev[5]].selected = true;	
 								// Remove Load Icon
 								document.querySelector("#status").innerHTML = "";
-
+								document.querySelector("#load").innerHTML = "";
+								// Load prev data
+								search();
 							}, 1500);
 						}
 						else{
+							// Remove Load Icon
 							document.querySelector("#status").innerHTML = "";
+							document.querySelector("#load").innerHTML = "";
+							// Load prev data
+							search();
 						}
 					}, 1500);
 				}
 				else{
+					// Remove Load Icon
 					document.querySelector("#status").innerHTML = "";		
+					document.querySelector("#load").innerHTML = "";	
+					// Load prev data
+					search();					
 				}
 			}, 1500);
 		}
 		else{
+			// Remove Load Icon
 			document.querySelector("#status").innerHTML = "";
+			document.querySelector("#load").innerHTML = "";
+			// Load prev data
+			search();
 		}
 	}
 }

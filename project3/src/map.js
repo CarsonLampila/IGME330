@@ -21,11 +21,12 @@ function initMap(){
 	map = new mapboxgl.Map({
 		container: 'map',
 		style: 'mapbox://styles/mapbox/light-v10',
-		center: [-96, 37.8],
-		zoom: 3
+		center: [-106, 37.8],
+		zoom: 3.9
 	});
+	
+	map.addControl(new mapboxgl.NavigationControl());
 }
-
 
 // Calc the contents for each marker
 function calcMarkers(scale, div, start, end, startTotal, endTotal){
@@ -74,12 +75,7 @@ function calcMarkers(scale, div, start, end, startTotal, endTotal){
 				break;	
 		}
 		
-		/*
-		// If pushed here name will always match data not always with coords
-		// Add marker vars
-		names.push(area);
-		*/
-			
+
 		const url = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + searchArea + ".json?access_token=" + key;
 
 	
@@ -123,8 +119,7 @@ function calcMarkers(scale, div, start, end, startTotal, endTotal){
 				coors.push([+json.features[0].geometry.coordinates[0], +json.features[0].geometry.coordinates[1]]);
 				
 				
-			// If pushed here name will always match with coords but not always with data	
-			// Add marker vars
+			// If pushed here data will always match the same ordering as the lat and long pulled so names coords and data always match with the correct marker
 			names.push(area);
 			orderS.push(start[i - 1]);
 			orderE.push(end[i - 1]);
@@ -136,7 +131,7 @@ function calcMarkers(scale, div, start, end, startTotal, endTotal){
 			if (i == scale.length - 1){
 				// Allow time to load
 				setTimeout(function(){ 
-					createMarkers(a, b, c, d);
+					createMarkers(start, end, startTotal, endTotal);
 				}, 2000);
 			}
 			

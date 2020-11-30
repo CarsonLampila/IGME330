@@ -1,13 +1,62 @@
-body {
-    margin: 0;
-    padding: 0;
+html::-webkit-scrollbar {
+    display: none;
 }
+
+header{
+	margin-bottom: 12%;
+	margin-left: 3%;
+	margin-right: 3%;
+	background: #03C04A;
+	border-radius: 25px;
+	box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);	
+	color: white;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	font-family: 'Merriweather Sans', sans-serif;
+}
+
+h1{
+	font-size: 3.5vw;
+	text-align: center;
+}
+
+h2{
+	font-size: 1.65vw;
+	text-align: center;
+}
+
+h3{
+	font-size: 20px;
+}
+
+h4{
+	font-weight: bold;
+	font-size: 16px
+}
+
+p{
+	margin: 3px 0 0 3px;
+	font-size: 15px;
+}
+
+label{
+	font-size: 1.65vw;
+}
+
+img{
+	width: 35%;
+	height: 35%;
+}
+
 #map {
     position: absolute;
-    top: 0;
-    bottom: 0;
+	height: 100%;
     width: 100%;
 }
+
 .marker {
 	background-image: url('../images/marker.png');
 	background-size: cover;
@@ -16,38 +65,95 @@ body {
 	border-radius: 50%;
 	cursor: pointer;
 }
+
 .mapboxgl-popup {
-	max-width: 200px;
+	max-width: 200px;	
 }
+
 .mapboxgl-popup-content {
+	background-color: #EDEDED;
+	border-radius: 10px;
+	box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);	
+	font-family: 'Merriweather Sans', sans-serif;
 	text-align: center;
-	font-family: 'Open Sans', sans-serif;
 }
+
 #controls{
-  position: absolute;
-  z-index: 1;
-  top: 20px;
-  left: 20px;
-  width:130px;
-  height:100px;
-  background-color: #FFF;
-  border: 1px solid black;
+	position: absolute;
+	z-index: 1;
+	width: 25%;
+	height: 100%;
+	background-color: #8DFA90;
+	border: 1px solid black;
+	border-radius: 75px;
+	box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);	
 }
 
-#dateSelect{
-  margin: 5px 0 0 5px;
+#startDrop,
+#endDrop,
+#dataDrop,
+#regionDrop,
+#stateDrop,
+#countyDrop,
+#buttons{
+	margin-top: 8%;
+	margin-left: 5%;
+	margin-right: 5%;
+	display: flex;
+    justify-content: space-between;
 }
 
-p{
-  font-weight:bold;
-  margin: 5px 0 0 5px;
-  font-size: 12px;
-  font-family: sans-serif;
+#startYearSelect,
+#endYearSelect, 
+#dataType,
+#region,
+#state,
+#county{
+	-moz-appearance: none;
+	padding: 2px;
+	width: 12vw;
+	height: 2.25vw;
+	cursor: pointer;
+	border-radius: 50px;
+	border-bottom: 2px solid #03C04A;
+	background-color: #3DED97;
+	font-size: 1.35vw;
+	color: black;
 }
 
-img{
-	width: 100px;
-	height: 100px;
+#startYearSelect:hover,
+#startYearSelect:focus,
+#endYearSelect:hover, 
+#endYearSelect:focus, 
+#dataType:hover,
+#dataType:focus,
+#region:hover,
+#region:focus,
+#state:hover,
+#state:focus,
+#county:hover,
+#county:focus{
+	background-color: 	#99EDC3;
+	border-bottom-color: #B0FC38;
+	color: #404040;
 }
 
-	
+#searchBtn,
+#resetBtn{
+	margin-top: 3%;
+	padding: 2px 25px;
+	cursor: pointer;
+  	background-color: #03C04A;
+	border-radius: 10px;
+	font-family: 'Merriweather Sans', sans-serif;
+	font-size: 25px;
+	color: white;
+	width: 165px;
+	height: 40px;
+}
+
+#status,
+#load{
+	display: flex;
+    justify-content: center;
+}

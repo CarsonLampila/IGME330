@@ -41,7 +41,7 @@ class Marker{
 		// If years are the same ignore
 		if (startYearSelect.value == endYearSelect.value){
 			content = '<h3>' + this.title + '</h3><p>Number of Households with ' + dataType.options[dataType.selectedIndex].label + 
-						'</p><p>' + endYearSelect.value + ": " + this.end + '</p><p>' + percentEnd + '% of total households</p>';
+						'</p><h4>' + endYearSelect.value + ":</h4><p>" + this.end + ' households</p><p>' + percentEnd + '% of total households</p>';
 		}
 		else{
 			// Find Growth/Loss rates
@@ -53,9 +53,9 @@ class Marker{
 				pos = "% loss";
 		
 			content = '<h3>' + this.title + '</h3><p>Number of Households with ' + dataType.options[dataType.selectedIndex].label + 
-						'</p><p>' + startYearSelect.value + ": " + this.start + '</p><p>' + percentStart + '% of total households</p>' +
-						'</p><p>' + endYearSelect.value + ": " + this.end + '</p><p>' + percentEnd + '% of total households</p><p>' +
-						math + pos + '</p>';
+						'</p><h4>' + startYearSelect.value + ":</h4><p>" + this.start + ' households</p><p>' + percentStart + '% of total households</p>' +
+						'</p><h4>' + endYearSelect.value + ":</h4><p>" + this.end + ' households</p><p>' + percentEnd + '% of total households</p><h4>' +
+						math + pos + '</h4>';
 		}
 	
 		return content;
