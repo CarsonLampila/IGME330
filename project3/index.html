@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset='utf-8' />
-    <title>Project 3</title>
+    <title>Internet Type by Household</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
 	<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans&family=Playfair+Display&display=swap" rel="stylesheet">
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
@@ -16,6 +16,20 @@
 	<header>
 		<h1>Internet Type by Household</h1>
 	</header>
+	
+	<div id="dataDrop">
+		<label for="dataType">Data Type:</label>
+		<select id="dataType">
+			<option label="Select a Data!" value="000" selected>000</option>
+			<option label="Any Internet Subscription:" value="002">002</option>
+			<option label="Dial-Up:" value="003">003</option>
+			<option label="Cellular Data:" value="005">101</option>
+			<option label="Broadband:" value="007">102</option>
+			<option label="Satellite Internet:" value="009">013</option>
+			<option label="Internet Without Subscription:" value="012">020</option>
+			<option label="No Internet Access:" value="013">021</option>
+		</select>
+	</div>
 	
 	<div id="startDrop">
 		<label for="startYearSelect">Start Year:</label>
@@ -40,20 +54,6 @@
 			<option value="2015">2015</option>
 			<option value="2014">2014</option>
 			<option value="2013">2013</option>
-		</select>
-	</div>
-	
-	<div id="dataDrop">
-		<label for="dataType">Data Type:</label>
-		<select id="dataType">
-			<option label="Select a Data!" value="000" selected>000</option>
-			<option label="Any Internet Subscription:" value="002">002</option>
-			<option label="Dial-Up:" value="003">003</option>
-			<option label="Cellular Data:" value="005">101</option>
-			<option label="Broadband:" value="007">102</option>
-			<option label="Satellite Internet:" value="009">013</option>
-			<option label="Internet Without Subscription:" value="012">020</option>
-			<option label="No Internet Access:" value="013">021</option>
 		</select>
 	</div>
 	
